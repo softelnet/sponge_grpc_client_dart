@@ -53,7 +53,7 @@ void main() {
       int maxEvents = 3;
       final List<SpongeEvent> events = [];
 
-      Subscription subscription = grpcClient.subscribe(['e.*']);
+      Subscription subscription = grpcClient.subscribe(['notification.*']);
 
       subscription.eventStream.listen(
         (event) async {
