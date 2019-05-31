@@ -19,6 +19,10 @@ import 'package:sponge_grpc_client_dart/src/grpc_client.dart';
 import 'package:test/test.dart';
 import 'logger_configuration.dart';
 
+/// This integration test requires the sponge-examples-project-remote-api-client-test-service/RemoteApiClientTestServiceMain
+/// service running on the localhost.
+///
+/// Note: No other tests should be running using this service at the same time.
 void main() {
   configLogger();
 
