@@ -36,8 +36,7 @@ void main() {
       var grpcClient = SpongeGrpcClient(restClient)
         // TODO Insecure channel.
         ..channelOptions =
-            ChannelOptions(credentials: const ChannelCredentials.insecure())
-        ..open();
+            ChannelOptions(credentials: const ChannelCredentials.insecure());
 
       var version = await grpcClient.getVersion();
 
@@ -51,8 +50,7 @@ void main() {
       var grpcClient = SpongeGrpcClient(restClient)
         // TODO Insecure channel.
         ..channelOptions =
-            ChannelOptions(credentials: const ChannelCredentials.insecure())
-        ..open();
+            ChannelOptions(credentials: const ChannelCredentials.insecure());
 
       int maxEvents = 3;
       final List<SpongeEvent> events = [];

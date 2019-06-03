@@ -25,8 +25,7 @@ void main() async {
   var grpcClient = SpongeGrpcClient(restClient)
     // Insecure channel.
     ..channelOptions =
-        ChannelOptions(credentials: const ChannelCredentials.insecure())
-    ..open();
+        ChannelOptions(credentials: const ChannelCredentials.insecure());
 
   // Get the Sponge version.
   var version = await grpcClient.getVersion();

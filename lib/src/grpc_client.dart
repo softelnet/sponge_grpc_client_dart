@@ -22,7 +22,9 @@ import 'package:sync/semaphore.dart';
 
 /// A Sponge gRPC API client.
 class SpongeGrpcClient {
-  SpongeGrpcClient(this.restClient, {this.channelOptions});
+  SpongeGrpcClient(this.restClient, {this.channelOptions}) {
+    _open();
+  }
 
   static final Logger _logger = Logger('SpongeGrpcClient');
   SpongeRestClient restClient;
@@ -37,7 +39,7 @@ class SpongeGrpcClient {
   /// Keep alive internal loop interval (in seconds). Defaults to 1 second.
   int keepAliveLoopInterval = 1;
 
-  void open() {
+  void _open() {
     if (channel != null) {
       return;
     }
@@ -47,7 +49,8 @@ class SpongeGrpcClient {
     var host = restUri.host;
     // Sponge gRPC API service port convention: REST API port + 1.
     var port = (restUri.hasPort ? restUri.port : 80) + 1;
-    _logger.info('Connecting to the Sponge gRPC API service $host:$port');
+    _logger.finer(
+        'Creating a new client to the Sponge gRPC API service $host:$port');
 
     channel = ClientChannel(host, port: port, options: channelOptions);
     serviceStub = SpongeGrpcApiClient(channel);
@@ -58,22 +61,43 @@ class SpongeGrpcClient {
     channel = null;
   }
 
-  Future<String> getVersion() async {
-    var version = (await serviceStub.getVersion(VersionRequest())).version;
+  Future<bool> testConnection() async {
+    try {
+      await serviceStub.getVersion(VersionRequest(),
+          options: CallOptions(timeout: Duration(seconds: 1)));
+      return true;
+    } on GrpcError {
+      //catch (e) {
+      return false;
+      // if (e.code == StatusCode.deadlineExceeded) {
+      //   return false;
+      // }
+    }
+  }
+
+  // TODO setupRequest (id, username, authToken)
+  // TODO Relogin if auth token exception
+
+  Future<String> getVersion({CallOptions options}) async {
+    var version =
+        (await serviceStub.getVersion(VersionRequest(), options: options))
+            .version;
     return (version?.isNotEmpty ?? false) ? version : null;
   }
 
-  Subscription subscribe(List<String> eventNames) =>
-      Subscription(this, eventNames)..open();
+  Subscription subscribe(List<String> eventNames, {CallOptions options}) =>
+      Subscription(this, eventNames, callOptions: options)..open();
 }
 
 class Subscription {
-  Subscription(this._grpcClient, this.eventNames);
+  Subscription(this._grpcClient, this.eventNames, {CallOptions callOptions})
+      : _callOptions = callOptions ?? CallOptions();
 
   static final Logger _logger = Logger('Subscription');
 
   final SpongeGrpcClient _grpcClient;
-  List<String> eventNames;
+  final List<String> eventNames;
+  final CallOptions _callOptions;
   bool _subscribed = false;
   bool get subscribed => _subscribed;
 
@@ -88,7 +112,7 @@ class Subscription {
     }
 
     eventStream = _grpcClient.serviceStub
-        .subscribe(_requestStream())
+        .subscribe(_requestStream(), options: _callOptions)
         .asyncMap((response) => SpongeGrpcUtils.createEventFromGrpc(
             _grpcClient.restClient, response.event))
         .asBroadcastStream();
