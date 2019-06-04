@@ -21,14 +21,17 @@ class SpongeGrpcUtils {
   static Future<SpongeEvent> createEventFromGrpc(
       SpongeRestClient restClient, Event grpcEvent) async {
     var event = SpongeEvent(
-        id: grpcEvent.hasId() ? grpcEvent.id : null,
-        name: grpcEvent.hasName() ? grpcEvent.name : null,
-        priority: grpcEvent.hasPriority() ? grpcEvent.priority : null,
-        time: grpcEvent.hasTime()
-            ? grpcEvent.time.toDateTime()
-            /*DateTime.fromMicrosecondsSinceEpoch(
+      id: grpcEvent.hasId() ? grpcEvent.id : null,
+      name: grpcEvent.hasName() ? grpcEvent.name : null,
+      priority: grpcEvent.hasPriority() ? grpcEvent.priority : null,
+      time: grpcEvent.hasTime()
+          ? grpcEvent.time.toDateTime()
+          /*DateTime.fromMicrosecondsSinceEpoch(
        grpcEvent.time.seconds.toInt() * 1000000 + grpcEvent.time.nanos ~/ 1000)*/
-            : null);
+          : null,
+      label: grpcEvent.hasLabel() ? grpcEvent.label : null,
+      description: grpcEvent.hasDescription() ? grpcEvent.description : null,
+    );
 
     if (grpcEvent.hasAttributes()) {
       Validate.isTrue(!grpcEvent.attributes.hasValueAny(),

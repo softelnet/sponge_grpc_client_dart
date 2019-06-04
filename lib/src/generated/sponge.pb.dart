@@ -76,7 +76,9 @@ class Event extends $pb.GeneratedMessage {
     ..a<$1.Timestamp>(3, 'time', $pb.PbFieldType.OM, $1.Timestamp.getDefault,
         $1.Timestamp.create)
     ..a<$core.int>(4, 'priority', $pb.PbFieldType.O3)
-    ..a<ObjectValue>(5, 'attributes', $pb.PbFieldType.OM,
+    ..aOS(5, 'label')
+    ..aOS(6, 'description')
+    ..a<ObjectValue>(7, 'attributes', $pb.PbFieldType.OM,
         ObjectValue.getDefault, ObjectValue.create)
     ..hasRequiredFields = false;
 
@@ -129,13 +131,29 @@ class Event extends $pb.GeneratedMessage {
   $core.bool hasPriority() => $_has(3);
   void clearPriority() => clearField(4);
 
-  ObjectValue get attributes => $_getN(4);
-  set attributes(ObjectValue v) {
-    setField(5, v);
+  $core.String get label => $_getS(4, '');
+  set label($core.String v) {
+    $_setString(4, v);
   }
 
-  $core.bool hasAttributes() => $_has(4);
-  void clearAttributes() => clearField(5);
+  $core.bool hasLabel() => $_has(4);
+  void clearLabel() => clearField(5);
+
+  $core.String get description => $_getS(5, '');
+  set description($core.String v) {
+    $_setString(5, v);
+  }
+
+  $core.bool hasDescription() => $_has(5);
+  void clearDescription() => clearField(6);
+
+  ObjectValue get attributes => $_getN(6);
+  set attributes(ObjectValue v) {
+    setField(7, v);
+  }
+
+  $core.bool hasAttributes() => $_has(6);
+  void clearAttributes() => clearField(7);
 }
 
 class RequestHeader extends $pb.GeneratedMessage {

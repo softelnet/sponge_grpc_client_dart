@@ -44,9 +44,11 @@ const Event$json = const {
       '10': 'time'
     },
     const {'1': 'priority', '3': 4, '4': 1, '5': 5, '10': 'priority'},
+    const {'1': 'label', '3': 5, '4': 1, '5': 9, '10': 'label'},
+    const {'1': 'description', '3': 6, '4': 1, '5': 9, '10': 'description'},
     const {
       '1': 'attributes',
-      '3': 5,
+      '3': 7,
       '4': 1,
       '5': 11,
       '6': '.org.openksavi.sponge.grpcapi.ObjectValue',

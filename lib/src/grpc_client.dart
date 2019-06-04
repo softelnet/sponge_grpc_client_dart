@@ -56,8 +56,12 @@ class SpongeGrpcClient {
     serviceStub = SpongeGrpcApiClient(channel);
   }
 
-  Future<void> close() async {
-    await channel?.shutdown();
+  Future<void> close({bool terminate = false}) async {
+    if (terminate) {
+      await channel?.terminate();
+    } else {
+      await channel?.shutdown();
+    }
     channel = null;
   }
 
