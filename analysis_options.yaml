@@ -34,3 +34,6 @@ linter:
     - valid_regexps
     - prefer_void_to_null
     - void_checks
+analyzer:
+  exclude:
+    - lib/src/generated/**
