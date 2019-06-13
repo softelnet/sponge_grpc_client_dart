@@ -17,6 +17,8 @@ import 'package:grpc/grpc.dart';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
+import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart'
+    as grpc;
 import 'package:sponge_grpc_client_dart/src/utils.dart';
 import 'package:sync/semaphore.dart';
 
@@ -67,26 +69,55 @@ class SpongeGrpcClient {
 
   Future<bool> testConnection() async {
     try {
-      await serviceStub.getVersion(VersionRequest(),
-          options: CallOptions(timeout: Duration(seconds: 1)));
+      await getVersion(options: CallOptions(timeout: Duration(seconds: 1)));
       return true;
     } on GrpcError {
-      //catch (e) {
       return false;
-      // if (e.code == StatusCode.deadlineExceeded) {
-      //   return false;
-      // }
     }
   }
 
-  // TODO setupRequest (id, username, authToken)
-  // TODO Relogin if auth token exception
+  /// Uses the REST client in order to setup the gRPC request header
+  /// by reusing the REST API authentication data.
+  grpc.RequestHeader createRequestHeader() {
+    var restHeader = restClient.setupRequest(SpongeRequest()).header;
+
+    return grpc.RequestHeader.create()
+      ..id ??= restHeader.id
+      ..username ??= restHeader.username
+      ..password ??= restHeader.password
+      ..authToken ??= restHeader.authToken;
+  }
+
+  void _handleResponseHeader(String operation, grpc.ResponseHeader header) {
+    if (header == null) {
+      return;
+    }
+
+    restClient.handleResponseHeader(
+        operation,
+        header.hasErrorCode() ? header.errorCode : null,
+        header.hasErrorMessage() ? header.errorMessage : null,
+        header.hasDetailedErrorMessage() ? header.detailedErrorMessage : null);
+  }
 
   Future<String> getVersion({CallOptions options}) async {
-    var version =
-        (await serviceStub.getVersion(VersionRequest(), options: options))
-            .version;
-    return (version?.isNotEmpty ?? false) ? version : null;
+    var request = VersionRequest()..header = createRequestHeader();
+
+    VersionResponse response = await restClient.executeWithAuthentication(
+        requestUsername: request.header.username,
+        requestPassword: request.header.password,
+        requestAuthToken: request.header.authToken,
+        onExecute: () async {
+          VersionResponse response =
+              await serviceStub.getVersion(request, options: options);
+          _handleResponseHeader(
+              'getVersion', response.hasHeader() ? response.header : null);
+
+          return response;
+        },
+        onClearAuthToken: () => request.header.authToken = null);
+
+    return response.hasVersion() ? response.version : null;
   }
 
   Subscription subscribe(List<String> eventNames, {CallOptions options}) =>
@@ -99,6 +130,7 @@ class Subscription {
 
   static final Logger _logger = Logger('Subscription');
 
+  int id;
   final SpongeGrpcClient _grpcClient;
   final List<String> eventNames;
   final CallOptions _callOptions;
@@ -117,9 +149,14 @@ class Subscription {
 
     eventStream = _grpcClient.serviceStub
         .subscribe(_requestStream(), options: _callOptions)
-        .asyncMap((response) => SpongeGrpcUtils.createEventFromGrpc(
-            _grpcClient.restClient, response.event))
-        .asBroadcastStream();
+        .asyncMap((response) {
+      // Set the subscription id from the server.
+      if (response.hasSubscriptionId()) {
+        id = response.subscriptionId?.toInt();
+      }
+      return SpongeGrpcUtils.createEventFromGrpc(
+          _grpcClient.restClient, response.event);
+    }).asBroadcastStream();
     _subscribed = true;
   }
 
@@ -137,12 +174,23 @@ class Subscription {
     );
   }
 
+  Future<SubscribeRequest> _createAndSetupSubscribeRequest() async {
+    if (_grpcClient.restClient.configuration.autoUseAuthToken) {
+      // Invoke the synchronous gRPC API operation to ensure the current authToken renewal. The auth token is shared
+      // by both the REST and gRPC connection. Here the `getVersion` operation is used.
+      await _grpcClient.getVersion();
+    }
+
+    return SubscribeRequest()
+      ..header = _grpcClient.createRequestHeader()
+      ..eventNames.addAll(eventNames);
+  }
+
   Stream<SubscribeRequest> _requestStream() async* {
     await _semaphore.acquire();
 
     try {
-      var request = SubscribeRequest()..eventNames.addAll(eventNames);
-      yield request;
+      yield await _createAndSetupSubscribeRequest();
 
       var timestamp = DateTime.now();
 
@@ -151,7 +199,7 @@ class Subscription {
         var newTimestamp = DateTime.now();
         if (newTimestamp.difference(timestamp).inSeconds >
             _grpcClient.keepAliveInterval) {
-          yield request;
+          yield await _createAndSetupSubscribeRequest();
           timestamp = newTimestamp;
         }
 
