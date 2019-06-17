@@ -33,8 +33,10 @@ void main() {
   group('gRPC client', () {
     test('version', () async {
       var restClient = await getClient();
-      // TODO Insecure channel.
-      var grpcClient = SpongeGrpcClient(restClient, channelOptions: ChannelOptions(credentials: const ChannelCredentials.insecure()));
+      // Insecure channel only for tests.
+      var grpcClient = SpongeGrpcClient(restClient,
+          channelOptions:
+              ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
       var version = await grpcClient.getVersion();
 
@@ -45,8 +47,10 @@ void main() {
     });
     test('subscribe', () async {
       var restClient = await getClient();
-      // TODO Insecure channel.
-      var grpcClient = SpongeGrpcClient(restClient, channelOptions: ChannelOptions(credentials: const ChannelCredentials.insecure()));
+      // Insecure channel only for tests.
+      var grpcClient = SpongeGrpcClient(restClient,
+          channelOptions:
+              ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
       int maxEvents = 3;
       final List<SpongeEvent> events = [];

@@ -24,14 +24,17 @@ import 'package:sync/semaphore.dart';
 
 /// A Sponge gRPC API client.
 class SpongeGrpcClient {
-  SpongeGrpcClient(this.restClient, {this.channelOptions}) {
+  SpongeGrpcClient(
+    this.restClient, {
+    this.channelOptions = const ChannelOptions(),
+  }) {
     _open();
   }
 
   static final Logger _logger = Logger('SpongeGrpcClient');
   SpongeRestClient restClient;
 
-  ChannelOptions channelOptions = ChannelOptions();
+  ChannelOptions channelOptions;
   ClientChannel channel;
   SpongeGrpcApiClient serviceStub;
 
@@ -51,8 +54,9 @@ class SpongeGrpcClient {
     var host = restUri.host;
     // Sponge gRPC API service port convention: REST API port + 1.
     var port = (restUri.hasPort ? restUri.port : 80) + 1;
+    bool isSecure = channelOptions?.credentials?.isSecure ?? false;
     _logger.finer(
-        'Creating a new client to the Sponge gRPC API service $host:$port');
+        'Creating a new client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
 
     channel = ClientChannel(host, port: port, options: channelOptions);
     serviceStub = SpongeGrpcApiClient(channel);
