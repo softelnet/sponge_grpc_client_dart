@@ -31,7 +31,7 @@ void main() {
   getClient() async => SpongeRestClient(
       SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
   group('gRPC client', () {
-    test('version', () async {
+    test('testVersion', () async {
       var restClient = await getClient();
       // Insecure channel only for tests.
       var grpcClient = SpongeGrpcClient(restClient,
@@ -45,7 +45,7 @@ void main() {
 
       await grpcClient.close();
     });
-    test('subscribe', () async {
+    test('testSubscribe', () async {
       var restClient = await getClient();
       // Insecure channel only for tests.
       var grpcClient = SpongeGrpcClient(restClient,
@@ -86,6 +86,14 @@ void main() {
 
       await subscription?.close();
       await grpcClient.close();
+    });
+  });
+  group('REST API support', () {
+    test('testRemoteApiFeatures', () async {
+      var restClient = await getClient();
+      Map<String, dynamic> features = await restClient.getFeatures();
+      expect(features.length, equals(1));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED], isTrue);
     });
   });
 }
