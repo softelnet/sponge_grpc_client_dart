@@ -87,13 +87,12 @@ void main() {
       await subscription?.close();
       await grpcClient.close();
     });
-  });
-  group('REST API support', () {
     test('testRemoteApiFeatures', () async {
       var restClient = await getClient();
       Map<String, dynamic> features = await restClient.getFeatures();
       expect(features.length, equals(1));
-      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED], isTrue);
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
+          isTrue);
     });
   });
 }
