@@ -124,19 +124,30 @@ class SpongeGrpcClient {
     return response.hasVersion() ? response.version : null;
   }
 
-  Subscription subscribe(List<String> eventNames, {CallOptions options}) =>
-      Subscription(this, eventNames, callOptions: options)..open();
+  Subscription subscribe(
+    List<String> eventNames, {
+    bool registeredTypeRequired = false,
+    CallOptions options,
+  }) =>
+      Subscription(this, eventNames,
+          registeredTypeRequired: registeredTypeRequired, callOptions: options)
+        ..open();
 }
 
 class Subscription {
-  Subscription(this._grpcClient, this.eventNames, {CallOptions callOptions})
-      : _callOptions = callOptions ?? CallOptions();
+  Subscription(
+    this._grpcClient,
+    this.eventNames, {
+    this.registeredTypeRequired = false,
+    CallOptions callOptions,
+  }) : _callOptions = callOptions ?? CallOptions();
 
   static final Logger _logger = Logger('Subscription');
 
   int id;
   final SpongeGrpcClient _grpcClient;
   final List<String> eventNames;
+  final bool registeredTypeRequired;
   final CallOptions _callOptions;
   bool _subscribed = false;
   bool get subscribed => _subscribed;
@@ -187,7 +198,8 @@ class Subscription {
 
     return SubscribeRequest()
       ..header = _grpcClient.createRequestHeader()
-      ..eventNames.addAll(eventNames);
+      ..eventNames.addAll(eventNames)
+      ..registeredTypeRequired = registeredTypeRequired;
   }
 
   Stream<SubscribeRequest> _requestStream() async* {

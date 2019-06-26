@@ -360,6 +360,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     ..a<RequestHeader>(1, 'header', $pb.PbFieldType.OM,
         RequestHeader.getDefault, RequestHeader.create)
     ..pPS(2, 'eventNames')
+    ..aOB(3, 'registeredTypeRequired')
     ..hasRequiredFields = false;
 
   SubscribeRequest() : super();
@@ -390,6 +391,14 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   void clearHeader() => clearField(1);
 
   $core.List<$core.String> get eventNames => $_getList(1);
+
+  $core.bool get registeredTypeRequired => $_get(2, false);
+  set registeredTypeRequired($core.bool v) {
+    $_setBool(2, v);
+  }
+
+  $core.bool hasRegisteredTypeRequired() => $_has(2);
+  void clearRegisteredTypeRequired() => clearField(3);
 }
 
 class SubscribeResponse extends $pb.GeneratedMessage {

@@ -124,6 +124,13 @@ const SubscribeRequest$json = const {
       '10': 'header'
     },
     const {'1': 'event_names', '3': 2, '4': 3, '5': 9, '10': 'eventNames'},
+    const {
+      '1': 'registered_type_required',
+      '3': 3,
+      '4': 1,
+      '5': 8,
+      '10': 'registeredTypeRequired'
+    },
   ],
 };
 
