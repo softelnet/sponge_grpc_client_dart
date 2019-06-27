@@ -25,18 +25,23 @@ import 'package:sync/semaphore.dart';
 /// A Sponge gRPC API client.
 class SpongeGrpcClient {
   SpongeGrpcClient(
-    this.restClient, {
-    this.channelOptions = const ChannelOptions(),
-  }) {
+    SpongeRestClient restClient, {
+    ChannelOptions channelOptions = const ChannelOptions(),
+  })  : this._restClient = restClient,
+        this._channelOptions = channelOptions {
     _open();
   }
 
   static final Logger _logger = Logger('SpongeGrpcClient');
-  SpongeRestClient restClient;
+  final SpongeRestClient _restClient;
+  SpongeRestClient get restClient => _restClient;
 
-  ChannelOptions channelOptions;
-  ClientChannel channel;
-  SpongeGrpcApiClient serviceStub;
+  ChannelOptions _channelOptions;
+  ChannelOptions get channelOptions => _channelOptions;
+  ClientChannel _channel;
+  ClientChannel get channel => _channel;
+  SpongeGrpcApiClient _serviceStub;
+  SpongeGrpcApiClient get serviceStub => _serviceStub;
 
   /// Keep alive request interval for subscriptions (in seconds). Defaults to 15 minutes.
   int keepAliveInterval = 15 * 60;
@@ -45,30 +50,30 @@ class SpongeGrpcClient {
   int keepAliveLoopInterval = 1;
 
   void _open() {
-    if (channel != null) {
+    if (_channel != null) {
       return;
     }
 
-    Uri restUri = Uri.parse(restClient.configuration.url);
+    Uri restUri = Uri.parse(_restClient.configuration.url);
 
     var host = restUri.host;
     // Sponge gRPC API service port convention: REST API port + 1.
     var port = (restUri.hasPort ? restUri.port : 80) + 1;
-    bool isSecure = channelOptions?.credentials?.isSecure ?? false;
+    bool isSecure = _channelOptions?.credentials?.isSecure ?? false;
     _logger.finer(
         'Creating a new client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
 
-    channel = ClientChannel(host, port: port, options: channelOptions);
-    serviceStub = SpongeGrpcApiClient(channel);
+    _channel = ClientChannel(host, port: port, options: _channelOptions);
+    _serviceStub = SpongeGrpcApiClient(_channel);
   }
 
   Future<void> close({bool terminate = false}) async {
     if (terminate) {
-      await channel?.terminate();
+      await _channel?.terminate();
     } else {
-      await channel?.shutdown();
+      await _channel?.shutdown();
     }
-    channel = null;
+    _channel = null;
   }
 
   Future<bool> testConnection() async {
@@ -113,7 +118,7 @@ class SpongeGrpcClient {
         requestAuthToken: request.header.authToken,
         onExecute: () async {
           VersionResponse response =
-              await serviceStub.getVersion(request, options: options);
+              await _serviceStub.getVersion(request, options: options);
           _handleResponseHeader(
               'getVersion', response.hasHeader() ? response.header : null);
 

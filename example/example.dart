@@ -22,10 +22,10 @@ void main() async {
       SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
 
   // Create a new Sponge gRPC API client associated with the REST API client.
-  var grpcClient = SpongeGrpcClient(restClient)
-    // Don't use insecure channel in production.
-    ..channelOptions =
-        ChannelOptions(credentials: const ChannelCredentials.insecure());
+  // Don't use insecure channel in production.
+  var grpcClient = SpongeGrpcClient(restClient,
+      channelOptions:
+          ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
   // Get the Sponge version.
   var version = await grpcClient.getVersion();
