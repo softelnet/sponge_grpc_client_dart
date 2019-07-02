@@ -53,9 +53,9 @@ void main() {
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
       int maxEvents = 3;
-      final List<SpongeEvent> events = [];
+      final List<RemoteEvent> events = [];
 
-      Subscription subscription = grpcClient.subscribe(['notification.*'], registeredTypeRequired: true);
+      ClientSubscription subscription = grpcClient.subscribe(['notification.*'], registeredTypeRequired: true);
 
       subscription.eventStream.listen(
         (event) async {

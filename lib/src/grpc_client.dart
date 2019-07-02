@@ -17,8 +17,7 @@ import 'package:grpc/grpc.dart';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
-import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart'
-    as grpc;
+
 import 'package:sponge_grpc_client_dart/src/utils.dart';
 import 'package:sync/semaphore.dart';
 
@@ -76,41 +75,9 @@ class SpongeGrpcClient {
     _channel = null;
   }
 
-  Future<bool> testConnection() async {
-    try {
-      await getVersion(options: CallOptions(timeout: Duration(seconds: 1)));
-      return true;
-    } on GrpcError {
-      return false;
-    }
-  }
-
-  /// Uses the REST client in order to setup the gRPC request header
-  /// by reusing the REST API authentication data.
-  grpc.RequestHeader createRequestHeader() {
-    var restHeader = restClient.setupRequest(SpongeRequest()).header;
-
-    return grpc.RequestHeader.create()
-      ..id ??= restHeader.id
-      ..username ??= restHeader.username
-      ..password ??= restHeader.password
-      ..authToken ??= restHeader.authToken;
-  }
-
-  void _handleResponseHeader(String operation, grpc.ResponseHeader header) {
-    if (header == null) {
-      return;
-    }
-
-    restClient.handleResponseHeader(
-        operation,
-        header.hasErrorCode() ? header.errorCode : null,
-        header.hasErrorMessage() ? header.errorMessage : null,
-        header.hasDetailedErrorMessage() ? header.detailedErrorMessage : null);
-  }
-
   Future<String> getVersion({CallOptions options}) async {
-    var request = VersionRequest()..header = createRequestHeader();
+    var request = VersionRequest()
+      ..header = SpongeGrpcUtils.createRequestHeader(_restClient);
 
     VersionResponse response = await restClient.executeWithAuthentication(
         requestUsername: request.header.username,
@@ -119,8 +86,8 @@ class SpongeGrpcClient {
         onExecute: () async {
           VersionResponse response =
               await _serviceStub.getVersion(request, options: options);
-          _handleResponseHeader(
-              'getVersion', response.hasHeader() ? response.header : null);
+          SpongeGrpcUtils.handleResponseHeader(_restClient, 'getVersion',
+              response.hasHeader() ? response.header : null);
 
           return response;
         },
@@ -129,36 +96,38 @@ class SpongeGrpcClient {
     return response.hasVersion() ? response.version : null;
   }
 
-  Subscription subscribe(
+  ClientSubscription subscribe(
     List<String> eventNames, {
     bool registeredTypeRequired = false,
     CallOptions options,
   }) =>
-      Subscription(this, eventNames,
+      ClientSubscription(this, eventNames,
           registeredTypeRequired: registeredTypeRequired, callOptions: options)
         ..open();
 }
 
-class Subscription {
-  Subscription(
+class ClientSubscription {
+  ClientSubscription(
     this._grpcClient,
-    this.eventNames, {
-    this.registeredTypeRequired = false,
+    this._eventNames, {
+    bool registeredTypeRequired = false,
     CallOptions callOptions,
-  }) : _callOptions = callOptions ?? CallOptions();
+  })  : _registeredTypeRequired = registeredTypeRequired,
+        _callOptions = callOptions ?? CallOptions();
 
-  static final Logger _logger = Logger('Subscription');
-
-  int id;
+  int _id;
+  int get id => _id;
   final SpongeGrpcClient _grpcClient;
-  final List<String> eventNames;
-  final bool registeredTypeRequired;
+  final List<String> _eventNames;
+  List<String> get eventNames => _eventNames;
+  final bool _registeredTypeRequired;
+  bool get registeredTypeRequired => _registeredTypeRequired;
   final CallOptions _callOptions;
   bool _subscribed = false;
   bool get subscribed => _subscribed;
 
-  Stream<SpongeEvent> _eventStream;
-  Stream<SpongeEvent> get eventStream => _eventStream;
+  Stream<RemoteEvent> _eventStream;
+  Stream<RemoteEvent> get eventStream => _eventStream;
 
   final _semaphore = Semaphore();
 
@@ -172,7 +141,7 @@ class Subscription {
         .asyncMap((response) {
       // Set the subscription id from the server.
       if (response.hasSubscriptionId()) {
-        id = response.subscriptionId?.toInt();
+        _id = response.subscriptionId?.toInt();
       }
       return SpongeGrpcUtils.createEventFromGrpc(
           _grpcClient.restClient, response.event);
@@ -180,7 +149,7 @@ class Subscription {
     _subscribed = true;
   }
 
-  set eventStream(Stream<SpongeEvent> value) {
+  set eventStream(Stream<RemoteEvent> value) {
     _eventStream = value;
 
     value.listen(
@@ -202,7 +171,7 @@ class Subscription {
     }
 
     return SubscribeRequest()
-      ..header = _grpcClient.createRequestHeader()
+      ..header = SpongeGrpcUtils.createRequestHeader(_grpcClient.restClient)
       ..eventNames.addAll(eventNames)
       ..registeredTypeRequired = registeredTypeRequired;
   }

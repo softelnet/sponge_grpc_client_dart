@@ -15,12 +15,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pb.dart';
+import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart'
+    as grpc;
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 
 class SpongeGrpcUtils {
-  static Future<SpongeEvent> createEventFromGrpc(
+  static Future<RemoteEvent> createEventFromGrpc(
       SpongeRestClient restClient, Event grpcEvent) async {
-    var event = SpongeEvent(
+    var event = RemoteEvent(
       id: grpcEvent.hasId() ? grpcEvent.id : null,
       name: grpcEvent.hasName() ? grpcEvent.name : null,
       priority: grpcEvent.hasPriority() ? grpcEvent.priority : null,
@@ -53,5 +55,29 @@ class SpongeGrpcUtils {
     }
 
     return event;
+  }
+
+    /// Uses the REST client in order to setup the gRPC request header
+  /// by reusing the REST API authentication data.
+  static grpc.RequestHeader createRequestHeader(SpongeRestClient restClient) {
+    var restHeader = restClient.setupRequest(SpongeRequest()).header;
+
+    return grpc.RequestHeader.create()
+      ..id ??= restHeader.id
+      ..username ??= restHeader.username
+      ..password ??= restHeader.password
+      ..authToken ??= restHeader.authToken;
+  }
+
+  static void handleResponseHeader(SpongeRestClient restClient, String operation, grpc.ResponseHeader header) {
+    if (header == null) {
+      return;
+    }
+
+    restClient.handleResponseHeader(
+        operation,
+        header.hasErrorCode() ? header.errorCode : null,
+        header.hasErrorMessage() ? header.errorMessage : null,
+        header.hasDetailedErrorMessage() ? header.detailedErrorMessage : null);
   }
 }
