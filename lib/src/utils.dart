@@ -26,11 +26,7 @@ class SpongeGrpcUtils {
       id: grpcEvent.hasId() ? grpcEvent.id : null,
       name: grpcEvent.hasName() ? grpcEvent.name : null,
       priority: grpcEvent.hasPriority() ? grpcEvent.priority : null,
-      time: grpcEvent.hasTime()
-          ? grpcEvent.time.toDateTime()
-          /*DateTime.fromMicrosecondsSinceEpoch(
-       grpcEvent.time.seconds.toInt() * 1000000 + grpcEvent.time.nanos ~/ 1000)*/
-          : null,
+      time: grpcEvent.hasTime() ? grpcEvent.time.toDateTime() : null,
       label: grpcEvent.hasLabel() ? grpcEvent.label : null,
       description: grpcEvent.hasDescription() ? grpcEvent.description : null,
     );
@@ -57,7 +53,7 @@ class SpongeGrpcUtils {
     return event;
   }
 
-    /// Uses the REST client in order to setup the gRPC request header
+  /// Uses the REST client in order to setup the gRPC request header
   /// by reusing the REST API authentication data.
   static grpc.RequestHeader createRequestHeader(SpongeRestClient restClient) {
     var restHeader = restClient.setupRequest(SpongeRequest()).header;
@@ -69,7 +65,8 @@ class SpongeGrpcUtils {
       ..authToken ??= restHeader.authToken;
   }
 
-  static void handleResponseHeader(SpongeRestClient restClient, String operation, grpc.ResponseHeader header) {
+  static void handleResponseHeader(SpongeRestClient restClient,
+      String operation, grpc.ResponseHeader header) {
     if (header == null) {
       return;
     }

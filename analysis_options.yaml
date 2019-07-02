@@ -37,3 +37,5 @@ linter:
 analyzer:
   exclude:
     - lib/src/generated/**
+    - lib/src/generated/google/**
+    - lib/src/generated/google/protobuf/**

@@ -55,7 +55,9 @@ void main() {
       int maxEvents = 3;
       final List<RemoteEvent> events = [];
 
-      ClientSubscription subscription = grpcClient.subscribe(['notification.*'], registeredTypeRequired: true);
+      var eventNames = ['notification.*'];
+      ClientSubscription subscription =
+          grpcClient.subscribe(eventNames, registeredTypeRequired: true);
 
       subscription.eventStream.listen(
         (event) async {
@@ -74,15 +76,22 @@ void main() {
         },
       );
 
+      expect(subscription.eventNames, equals(eventNames));
+      expect(subscription.registeredTypeRequired, isTrue);
+      expect(subscription.subscribed, isTrue);
+
       // Wait for finish.
       await subscription.eventStream
           .timeout(Duration(seconds: 30))
           .listen((_) {})
           .asFuture();
 
-      expect(events.length, equals(maxEvents));
+      await subscription.close();
 
-      // TODO Assertion for attributes.
+      expect(events.length, equals(maxEvents));
+      expect(subscription.subscribed, isFalse);
+
+      expect(events[1].attributes['source'], equals('Sponge'));
 
       await subscription?.close();
       await grpcClient.close();

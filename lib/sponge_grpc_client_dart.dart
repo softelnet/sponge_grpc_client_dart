@@ -13,4 +13,3 @@
 // limitations under the License.
 
 export 'src/grpc_client.dart';
-export 'src/utils.dart';
