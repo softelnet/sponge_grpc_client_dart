@@ -35,7 +35,7 @@ class SpongeGrpcClient {
   final SpongeRestClient _restClient;
   SpongeRestClient get restClient => _restClient;
 
-  ChannelOptions _channelOptions;
+  final ChannelOptions _channelOptions;
   ChannelOptions get channelOptions => _channelOptions;
   ClientChannel _channel;
   ClientChannel get channel => _channel;

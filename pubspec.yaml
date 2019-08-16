@@ -9,8 +9,8 @@ environment:
   sdk: '>=2.0.0 <3.0.0'
 
 dependencies:
-  grpc: ^1.0.2
-  protobuf: ^0.10.1
+  grpc: ^2.0.3
+  protobuf: ^0.13.15
   sync: ^0.2.0
   logging: ^0.11.3+2
   sponge_client_dart: #^1.11.0 # Uncomment for publishing.
