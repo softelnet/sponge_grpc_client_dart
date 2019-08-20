@@ -58,11 +58,22 @@ class SpongeGrpcUtils {
   static grpc.RequestHeader createRequestHeader(SpongeRestClient restClient) {
     var restHeader = restClient.setupRequest(SpongeRequest()).header;
 
-    return grpc.RequestHeader.create()
-      ..id ??= restHeader.id
-      ..username ??= restHeader.username
-      ..password ??= restHeader.password
-      ..authToken ??= restHeader.authToken;
+    var grpcHeader = grpc.RequestHeader.create();
+
+    if (restHeader.id != null) {
+      grpcHeader.id = restHeader.id;
+    }
+    if (restHeader.username != null) {
+      grpcHeader.username = restHeader.username;
+    }
+    if (restHeader.password != null) {
+      grpcHeader.password = restHeader.password;
+    }
+    if (restHeader.authToken != null) {
+      grpcHeader.authToken = restHeader.authToken;
+    }
+
+    return grpcHeader;
   }
 
   static void handleResponseHeader(SpongeRestClient restClient,
