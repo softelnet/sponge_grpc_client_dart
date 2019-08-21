@@ -136,7 +136,7 @@ class ClientSubscription {
       return;
     }
 
-    eventStream = _grpcClient.serviceStub
+    _setupEventStream(_grpcClient.serviceStub
         .subscribe(_requestStream(), options: _callOptions)
         .asyncMap((response) {
       // Set the subscription id from the server.
@@ -145,11 +145,11 @@ class ClientSubscription {
       }
       return SpongeGrpcUtils.createEventFromGrpc(
           _grpcClient.restClient, response.event);
-    }).asBroadcastStream();
+    }).asBroadcastStream());
     _subscribed = true;
   }
 
-  set eventStream(Stream<RemoteEvent> value) {
+  void _setupEventStream(Stream<RemoteEvent> value) {
     _eventStream = value;
 
     value.listen(
