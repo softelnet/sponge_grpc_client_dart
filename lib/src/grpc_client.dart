@@ -57,7 +57,10 @@ class SpongeGrpcClient {
 
     var host = restUri.host;
     // Sponge gRPC API service port convention: REST API port + 1.
-    var port = (restUri.hasPort ? restUri.port : 80) + 1;
+    var port = (restUri.hasPort
+            ? restUri.port
+            : (restClient.configuration.secure ? 443 : 80)) +
+        1;
     bool isSecure = _channelOptions?.credentials?.isSecure ?? false;
     _logger.finer(
         'Creating a new client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
