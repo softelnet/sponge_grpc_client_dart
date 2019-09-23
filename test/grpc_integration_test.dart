@@ -16,6 +16,7 @@ import 'package:grpc/grpc.dart';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client.dart';
+import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
 import 'package:test/test.dart';
 import 'logger_configuration.dart';
 
@@ -102,6 +103,29 @@ void main() {
       expect(features.length, equals(1));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);
+    });
+    test('testPortChange', () async {
+      var restClient = await getClient();
+      // Insecure channel only for tests.
+      var grpcClient = SpongeGrpcClient(restClient,
+          configuration: SpongeGrpcClientConfiguration(
+            port: 9000,
+          ),
+          channelOptions:
+              ChannelOptions(credentials: const ChannelCredentials.insecure()));
+
+      try {
+        await grpcClient.getVersion();
+
+        fail('Exception expected');
+      } catch (e) {
+        expect(
+            e,
+            isA<GrpcError>().having(
+                (ex) => ex.code, 'status', equals(StatusCode.unavailable)));
+      }
+
+      await grpcClient.close();
     });
   });
 }

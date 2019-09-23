@@ -17,6 +17,7 @@ import 'package:grpc/grpc.dart';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
+import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
 
 import 'package:sponge_grpc_client_dart/src/utils.dart';
 import 'package:sync/semaphore.dart';
@@ -25,8 +26,10 @@ import 'package:sync/semaphore.dart';
 class SpongeGrpcClient {
   SpongeGrpcClient(
     SpongeRestClient restClient, {
+    SpongeGrpcClientConfiguration configuration,
     ChannelOptions channelOptions = const ChannelOptions(),
   })  : this._restClient = restClient,
+        this._configuration = configuration,
         this._channelOptions = channelOptions {
     _open();
   }
@@ -35,8 +38,12 @@ class SpongeGrpcClient {
   final SpongeRestClient _restClient;
   SpongeRestClient get restClient => _restClient;
 
+  final SpongeGrpcClientConfiguration _configuration;
+  SpongeGrpcClientConfiguration get configuration => _configuration;
+
   final ChannelOptions _channelOptions;
   ChannelOptions get channelOptions => _channelOptions;
+
   ClientChannel _channel;
   ClientChannel get channel => _channel;
   SpongeGrpcApiClient _serviceStub;
@@ -55,9 +62,11 @@ class SpongeGrpcClient {
 
     Uri restUri = Uri.parse(_restClient.configuration.url);
 
-    var host = restUri.host;
-    // Sponge gRPC API service port convention: REST API port + 1.
-    var port = (restUri.hasPort
+    String host = restUri.host;
+    int port = _configuration?.port;
+
+    // If the port is not configured explicitly, use the Sponge gRPC API service port convention: REST API port + 1.
+    port ??= (restUri.hasPort
             ? restUri.port
             : (restClient.configuration.secure ? 443 : 80)) +
         1;

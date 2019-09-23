@@ -12,5 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'src/grpc_client.dart';
-export 'src/grpc_client_configuration.dart';
+/// A Sponge gRPC API configuration.
+class SpongeGrpcClientConfiguration {
+  SpongeGrpcClientConfiguration({
+    this.port,
+  });
+
+  /// The service port.
+  final int port;
+}
