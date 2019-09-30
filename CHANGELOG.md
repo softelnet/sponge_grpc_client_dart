@@ -1,4 +1,4 @@
-## 1.12.0 (not released yet)
+## 1.12.0 (2019-09-30)
 
 * The gRPC client allows an explicit service port configuration.
 * Fixed the gRPC default port resolving.
