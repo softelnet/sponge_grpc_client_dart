@@ -1,3 +1,7 @@
+## 1.13.0 (2019-10-30)
+
+* Dependencies upgrade.
+  
 ## 1.12.0 (2019-09-30)
 
 * The gRPC client allows an explicit service port configuration.
