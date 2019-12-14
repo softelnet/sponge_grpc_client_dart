@@ -56,7 +56,8 @@ class SpongeGrpcUtils {
   /// Uses the REST client in order to setup the gRPC request header
   /// by reusing the REST API authentication data.
   static grpc.RequestHeader createRequestHeader(SpongeRestClient restClient) {
-    var restHeader = restClient.setupRequest(SpongeRequest()).header;
+    // Create a fake request to obtain a header.
+    var restHeader = restClient.setupRequest(GetVersionRequest()).header;
 
     var grpcHeader = grpc.RequestHeader.create();
 
