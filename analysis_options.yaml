@@ -36,6 +36,4 @@ linter:
     - void_checks
 analyzer:
   exclude:
-    - lib/src/generated/**
-    - lib/src/generated/google/**
-    - lib/src/generated/google/protobuf/**
+    - lib/src/generated/**.dart

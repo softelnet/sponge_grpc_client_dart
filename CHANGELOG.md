@@ -1,3 +1,7 @@
+## 1.14.0 (2019-12-21)
+
+* Dependencies upgrade.
+  
 ## 1.13.0 (2019-10-30)
 
 * Dependencies upgrade.
