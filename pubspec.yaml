@@ -13,8 +13,8 @@ dependencies:
   sync: ^0.2.0
   fixnum: ^0.10.11
   logging: ^0.11.3+2
-  sponge_client_dart: ^1.14.0+1 # Uncomment for publishing.
-    #path: ../sponge_client_dart # Use the local library if possible. Comment for publishing.
+  sponge_client_dart: #^1.14.0+1 # Uncomment for publishing.
+    path: ../sponge_client_dart # Use the local library if possible. Comment for publishing.
 
 dev_dependencies:
   test: ^1.9.4
