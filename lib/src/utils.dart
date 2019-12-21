@@ -38,7 +38,7 @@ class SpongeGrpcUtils {
           (grpcEvent.attributes.valueJson?.isNotEmpty ?? false)) {
         Map<String, dynamic> jsonAttributes =
             json.decode(grpcEvent.attributes.valueJson);
-        RecordType eventType = await restClient.getEventType(event.name);
+        var eventType = await restClient.getEventType(event.name);
 
         // Unmarshal event attributes only if the event type is registered.
         if (eventType != null) {

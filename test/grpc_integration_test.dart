@@ -27,9 +27,9 @@ import 'logger_configuration.dart';
 void main() {
   configLogger();
 
-  final Logger _logger = Logger('Test');
+  final _logger = Logger('Test');
 
-  getClient() async => SpongeRestClient(
+  Future<SpongeRestClient> getClient() async => SpongeRestClient(
       SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
   group('gRPC client', () {
     test('testVersion', () async {
@@ -53,11 +53,11 @@ void main() {
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
-      int maxEvents = 3;
-      final List<RemoteEvent> events = [];
+      var maxEvents = 3;
+      final events = <RemoteEvent>[];
 
       var eventNames = ['notification.*'];
-      ClientSubscription subscription =
+      var subscription =
           grpcClient.subscribe(eventNames, registeredTypeRequired: true);
 
       subscription.eventStream.listen(
@@ -99,7 +99,7 @@ void main() {
     });
     test('testRemoteApiFeatures', () async {
       var restClient = await getClient();
-      Map<String, dynamic> features = await restClient.getFeatures();
+      var features = await restClient.getFeatures();
       expect(features.length, equals(1));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);

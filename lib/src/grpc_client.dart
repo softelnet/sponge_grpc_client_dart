@@ -28,9 +28,9 @@ class SpongeGrpcClient {
     SpongeRestClient restClient, {
     SpongeGrpcClientConfiguration configuration,
     ChannelOptions channelOptions = const ChannelOptions(),
-  })  : this._restClient = restClient,
-        this._configuration = configuration,
-        this._channelOptions = channelOptions {
+  })  : _restClient = restClient,
+        _configuration = configuration,
+        _channelOptions = channelOptions {
     _open();
   }
 
@@ -60,17 +60,17 @@ class SpongeGrpcClient {
       return;
     }
 
-    Uri restUri = Uri.parse(_restClient.configuration.url);
+    var restUri = Uri.parse(_restClient.configuration.url);
 
-    String host = restUri.host;
-    int port = _configuration?.port;
+    var host = restUri.host;
+    var port = _configuration?.port;
 
     // If the port is not configured explicitly, use the Sponge gRPC API service port convention: REST API port + 1.
     port ??= (restUri.hasPort
             ? restUri.port
             : (restClient.configuration.secure ? 443 : 80)) +
         1;
-    bool isSecure = _channelOptions?.credentials?.isSecure ?? false;
+    var isSecure = _channelOptions?.credentials?.isSecure ?? false;
     _logger.finer(
         'Creating a new client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
 
@@ -91,12 +91,12 @@ class SpongeGrpcClient {
     var request = VersionRequest()
       ..header = SpongeGrpcUtils.createRequestHeader(_restClient);
 
-    VersionResponse response = await restClient.executeWithAuthentication(
+    var response = await restClient.executeWithAuthentication(
         requestUsername: request.header.username,
         requestPassword: request.header.password,
         requestAuthToken: request.header.authToken,
         onExecute: () async {
-          VersionResponse response =
+          var response =
               await _serviceStub.getVersion(request, options: options);
           SpongeGrpcUtils.handleResponseHeader(_restClient, 'getVersion',
               response.hasHeader() ? response.header : null);
