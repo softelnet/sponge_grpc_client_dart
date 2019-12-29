@@ -26,6 +26,12 @@ class SpongeGrpcApiClient extends $grpc.Client {
           ($0.SubscribeRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.SubscribeResponse.fromBuffer(value));
+  static final _$subscribeManaged =
+      $grpc.ClientMethod<$0.SubscribeRequest, $0.SubscribeResponse>(
+          '/org.openksavi.sponge.grpcapi.SpongeGrpcApi/SubscribeManaged',
+          ($0.SubscribeRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.SubscribeResponse.fromBuffer(value));
 
   SpongeGrpcApiClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
       : super(channel, options: options);
@@ -39,9 +45,17 @@ class SpongeGrpcApiClient extends $grpc.Client {
   }
 
   $grpc.ResponseStream<$0.SubscribeResponse> subscribe(
+      $0.SubscribeRequest request,
+      {$grpc.CallOptions options}) {
+    final call = $createCall(_$subscribe, $async.Stream.fromIterable([request]),
+        options: options);
+    return $grpc.ResponseStream(call);
+  }
+
+  $grpc.ResponseStream<$0.SubscribeResponse> subscribeManaged(
       $async.Stream<$0.SubscribeRequest> request,
       {$grpc.CallOptions options}) {
-    final call = $createCall(_$subscribe, request, options: options);
+    final call = $createCall(_$subscribeManaged, request, options: options);
     return $grpc.ResponseStream(call);
   }
 }
@@ -59,7 +73,14 @@ abstract class SpongeGrpcApiServiceBase extends $grpc.Service {
         ($0.VersionResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.SubscribeRequest, $0.SubscribeResponse>(
         'Subscribe',
-        subscribe,
+        subscribe_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.SubscribeRequest.fromBuffer(value),
+        ($0.SubscribeResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SubscribeRequest, $0.SubscribeResponse>(
+        'SubscribeManaged',
+        subscribeManaged,
         true,
         true,
         ($core.List<$core.int> value) => $0.SubscribeRequest.fromBuffer(value),
@@ -71,8 +92,15 @@ abstract class SpongeGrpcApiServiceBase extends $grpc.Service {
     return getVersion(call, await request);
   }
 
+  $async.Stream<$0.SubscribeResponse> subscribe_Pre($grpc.ServiceCall call,
+      $async.Future<$0.SubscribeRequest> request) async* {
+    yield* subscribe(call, await request);
+  }
+
   $async.Future<$0.VersionResponse> getVersion(
       $grpc.ServiceCall call, $0.VersionRequest request);
   $async.Stream<$0.SubscribeResponse> subscribe(
+      $grpc.ServiceCall call, $0.SubscribeRequest request);
+  $async.Stream<$0.SubscribeResponse> subscribeManaged(
       $grpc.ServiceCall call, $async.Stream<$0.SubscribeRequest> request);
 }

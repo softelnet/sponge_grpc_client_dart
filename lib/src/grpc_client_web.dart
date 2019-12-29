@@ -13,32 +13,27 @@
 // limitations under the License.
 
 import 'dart:async';
-import 'package:grpc/grpc.dart';
+import 'package:grpc/grpc_web.dart';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_base.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
 
-/// A Sponge gRPC API client.
-class DefaultSpongeGrpcClient extends SpongeGrpcClient {
-  DefaultSpongeGrpcClient(
+/// A Sponge web gRPC API client.
+class WebSpongeGrpcClient extends SpongeGrpcClient {
+  WebSpongeGrpcClient(
     SpongeRestClient restClient, {
     SpongeGrpcClientConfiguration configuration,
-    ChannelOptions channelOptions = const ChannelOptions(),
     bool autoOpen = true,
-  })  : _channelOptions = channelOptions,
-        super(restClient, configuration: configuration) {
+  }) : super(restClient, configuration: configuration) {
     if (autoOpen) open();
   }
 
-  static final Logger _logger = Logger('DefaultSpongeGrpcClient');
+  static final Logger _logger = Logger('WebSpongeGrpcClient');
 
-  final ChannelOptions _channelOptions;
-  ChannelOptions get channelOptions => _channelOptions;
-
-  ClientChannel _channel;
-  ClientChannel get channel => _channel;
+  GrpcWebClientChannel _channel;
+  GrpcWebClientChannel get channel => _channel;
 
   @override
   void open() {
@@ -51,16 +46,18 @@ class DefaultSpongeGrpcClient extends SpongeGrpcClient {
     var host = restUri.host;
     var port = configuration?.port;
 
-    // If the port is not configured explicitly, use the Sponge gRPC API service port convention: REST API port + 1.
+    // If the port is not configured explicitly, use the Sponge gRPC Web API service port convention: REST API port + 2.
     port ??= (restUri.hasPort
             ? restUri.port
             : (restClient.configuration.secure ? 443 : 80)) +
-        1;
-    var isSecure = _channelOptions?.credentials?.isSecure ?? false;
-    _logger.finer(
-        'Creating a new client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
+        2;
 
-    _channel = ClientChannel(host, port: port, options: _channelOptions);
+    var isSecure = restUri.isScheme('HTTPS');
+    _logger.finer(
+        'Creating a new web client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
+
+    _channel =
+        GrpcWebClientChannel.xhr(Uri.parse('${restUri.scheme}://$host:$port'));
     serviceStub = SpongeGrpcApiClient(_channel);
   }
 
@@ -72,5 +69,22 @@ class DefaultSpongeGrpcClient extends SpongeGrpcClient {
       await _channel?.shutdown();
     }
     _channel = null;
+  }
+
+  /// The option [managed] is not supported for the web gRPC client.
+  @override
+  ClientSubscription subscribe(
+    List<String> eventNames, {
+    bool registeredTypeRequired = false,
+    CallOptions options,
+    bool managed = true,
+  }) {
+    Validate.isTrue(!managed,
+        'The managed subscription uses gRPC bidirectional streaming that is not supported for a web client');
+
+    return super.subscribe(eventNames,
+        registeredTypeRequired: registeredTypeRequired,
+        options: options,
+        managed: managed);
   }
 }

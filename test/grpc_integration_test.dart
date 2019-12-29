@@ -35,7 +35,7 @@ void main() {
     test('testVersion', () async {
       var restClient = await getClient();
       // Insecure channel only for tests.
-      var grpcClient = SpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(restClient,
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
@@ -49,7 +49,7 @@ void main() {
     test('testSubscribe', () async {
       var restClient = await getClient();
       // Insecure channel only for tests.
-      var grpcClient = SpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(restClient,
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
@@ -107,7 +107,7 @@ void main() {
     test('testPortChange', () async {
       var restClient = await getClient();
       // Insecure channel only for tests.
-      var grpcClient = SpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(restClient,
           configuration: SpongeGrpcClientConfiguration(
             port: 9000,
           ),

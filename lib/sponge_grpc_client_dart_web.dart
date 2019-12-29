@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'src/grpc_client.dart';
 export 'src/grpc_client_base.dart';
 export 'src/grpc_client_configuration.dart';
+export 'src/grpc_client_web.dart';

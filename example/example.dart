@@ -23,7 +23,7 @@ void main() async {
 
   // Create a new Sponge gRPC API client associated with the REST API client.
   // Don't use insecure channel in production.
-  var grpcClient = SpongeGrpcClient(restClient,
+  var grpcClient = DefaultSpongeGrpcClient(restClient,
       channelOptions:
           ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
