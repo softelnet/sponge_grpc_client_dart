@@ -58,7 +58,7 @@ class WebSpongeGrpcClient extends SpongeGrpcClient {
 
     _channel =
         GrpcWebClientChannel.xhr(Uri.parse('${restUri.scheme}://$host:$port'));
-    serviceStub = SpongeGrpcApiClient(_channel);
+    service = SpongeGrpcApiClient(_channel);
   }
 
   @override
@@ -87,4 +87,8 @@ class WebSpongeGrpcClient extends SpongeGrpcClient {
         options: options,
         managed: managed);
   }
+
+  @override
+  bool isCancelledErrorCode(error) =>
+      error is GrpcError && error.code == StatusCode.cancelled;
 }

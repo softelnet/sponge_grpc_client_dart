@@ -46,7 +46,8 @@ void main() {
 
       await grpcClient.close();
     });
-    test('testSubscribe', () async {
+
+    Future<void> _testSubscribe(bool managed) async {
       var restClient = await getClient();
       // Insecure channel only for tests.
       var grpcClient = DefaultSpongeGrpcClient(restClient,
@@ -57,16 +58,16 @@ void main() {
       final events = <RemoteEvent>[];
 
       var eventNames = ['notification.*'];
-      var subscription =
-          grpcClient.subscribe(eventNames, registeredTypeRequired: true);
+      var subscription = grpcClient.subscribe(eventNames,
+          registeredTypeRequired: true, managed: managed);
 
       subscription.eventStream.listen(
         (event) async {
-          _logger.info('Adding event: ${event.name}, ${event.attributes}');
-          events.add(event);
-
           if (events.length >= maxEvents) {
             await subscription.close();
+          } else {
+            _logger.info('Adding event: ${event.name}, ${event.attributes}');
+            events.add(event);
           }
         },
         onError: (e) {
@@ -96,6 +97,16 @@ void main() {
 
       await subscription?.close();
       await grpcClient.close();
+    }
+
+    test('testSubscribeManaged', () async => await _testSubscribe(true));
+    test('testSubscribeNotManaged', () async => await _testSubscribe(false));
+    test('testRemoteApiFeatures', () async {
+      var restClient = await getClient();
+      var features = await restClient.getFeatures();
+      expect(features.length, equals(1));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
+          isTrue);
     });
     test('testRemoteApiFeatures', () async {
       var restClient = await getClient();

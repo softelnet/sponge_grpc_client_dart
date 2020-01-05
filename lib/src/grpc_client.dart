@@ -32,7 +32,7 @@ class DefaultSpongeGrpcClient extends SpongeGrpcClient {
     if (autoOpen) open();
   }
 
-  static final Logger _logger = Logger('DefaultSpongeGrpcClient');
+  static final _logger = Logger('DefaultSpongeGrpcClient');
 
   final ChannelOptions _channelOptions;
   ChannelOptions get channelOptions => _channelOptions;
@@ -61,7 +61,7 @@ class DefaultSpongeGrpcClient extends SpongeGrpcClient {
         'Creating a new client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
 
     _channel = ClientChannel(host, port: port, options: _channelOptions);
-    serviceStub = SpongeGrpcApiClient(_channel);
+    service = SpongeGrpcApiClient(_channel);
   }
 
   @override
@@ -73,4 +73,8 @@ class DefaultSpongeGrpcClient extends SpongeGrpcClient {
     }
     _channel = null;
   }
+
+  @override
+  bool isCancelledErrorCode(error) =>
+      error is GrpcError && error.code == StatusCode.cancelled;
 }

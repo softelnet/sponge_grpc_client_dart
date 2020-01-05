@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:grpc/service_api.dart';
+import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
@@ -33,9 +36,9 @@ abstract class SpongeGrpcClient {
   final SpongeGrpcClientConfiguration _configuration;
   SpongeGrpcClientConfiguration get configuration => _configuration;
 
-  SpongeGrpcApiClient _serviceStub;
-  SpongeGrpcApiClient get serviceStub => _serviceStub;
-  set serviceStub(SpongeGrpcApiClient value) => _serviceStub = value;
+  SpongeGrpcApiClient _service;
+  SpongeGrpcApiClient get service => _service;
+  set service(SpongeGrpcApiClient value) => _service = value;
 
   /// Keep alive request interval for subscriptions (in seconds). Defaults to 15 minutes.
   int keepAliveInterval = 15 * 60;
@@ -56,8 +59,7 @@ abstract class SpongeGrpcClient {
         requestPassword: request.header.password,
         requestAuthToken: request.header.authToken,
         onExecute: () async {
-          var response =
-              await _serviceStub.getVersion(request, options: options);
+          var response = await _service.getVersion(request, options: options);
           SpongeGrpcUtils.handleResponseHeader(_restClient, 'getVersion',
               response.hasHeader() ? response.header : null);
 
@@ -79,6 +81,9 @@ abstract class SpongeGrpcClient {
           callOptions: options,
           managed: managed)
         .._open();
+
+  /// This method is necessary in order to provide a web gRPC support.
+  bool isCancelledErrorCode(dynamic error);
 }
 
 class ClientSubscription {
@@ -92,6 +97,8 @@ class ClientSubscription {
         _managed = managed,
         _callOptions = callOptions ?? CallOptions();
 
+  static final _logger = Logger('ClientSubscription');
+
   int _id;
   int get id => _id;
   final SpongeGrpcClient _grpcClient;
@@ -103,6 +110,7 @@ class ClientSubscription {
   final bool _managed;
   bool _subscribed = false;
   bool get subscribed => _subscribed;
+  ResponseStream<SubscribeResponse> _responseStream;
 
   Stream<RemoteEvent> _eventStream;
   Stream<RemoteEvent> get eventStream => _eventStream;
@@ -114,26 +122,35 @@ class ClientSubscription {
       return;
     }
 
-    var responseStream = _managed
-        ? _grpcClient.serviceStub
-            .subscribeManaged(_requestStream(), options: _callOptions)
-        : _subscribeOnce();
+    Stream<SubscribeResponse> localResponseStream;
 
-    _setupEventStream(responseStream.asyncMap((response) {
+    if (_managed) {
+      localResponseStream = _responseStream = _grpcClient.service
+          .subscribeManaged(_requestStream(), options: _callOptions);
+    } else {
+      localResponseStream = _subscribeOnce();
+    }
+
+    _setupEventStream(localResponseStream.asyncMap((response) {
       // Set the subscription id from the server.
       if (response.hasSubscriptionId()) {
         _id = response.subscriptionId?.toInt();
       }
       return SpongeGrpcUtils.createEventFromGrpc(
           _grpcClient.restClient, response.event);
-    }).asBroadcastStream());
+    }));
     _subscribed = true;
   }
 
   void _setupEventStream(Stream<RemoteEvent> value) {
-    _eventStream = value;
+    _eventStream = value
+        .handleError(
+          (error) => _logger.fine(error),
+          test: (error) => _grpcClient.isCancelledErrorCode(error),
+        )
+        .asBroadcastStream();
 
-    value.listen(
+    _eventStream.listen(
       null,
       onError: (e) {
         _subscribed = false;
@@ -183,14 +200,20 @@ class ClientSubscription {
   }
 
   Stream<SubscribeResponse> _subscribeOnce() async* {
-    yield* _grpcClient.serviceStub.subscribe(
+    _responseStream = _grpcClient.service.subscribe(
         await _createAndSetupSubscribeRequest(),
         options: _callOptions);
+    yield* _responseStream;
   }
 
   Future<void> close() async {
     _subscribed = false;
-    await _semaphore.acquire();
-    _semaphore.release();
+
+    if (_managed) {
+      await _semaphore.acquire();
+      _semaphore.release();
+    } else {
+      await _responseStream?.cancel();
+    }
   }
 }
