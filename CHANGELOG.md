@@ -1,6 +1,7 @@
 ## 1.14.1 (not released yet)
 
 * Support for a web client in the `package:sponge_grpc_client_dart/sponge_grpc_client_dart_web.dart`.
+* Added `features` to the request header.
 
 ## 1.14.0 (2019-12-21)
 

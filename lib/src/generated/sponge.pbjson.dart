@@ -65,6 +65,14 @@ const RequestHeader$json = const {
     const {'1': 'username', '3': 2, '4': 1, '5': 9, '10': 'username'},
     const {'1': 'password', '3': 3, '4': 1, '5': 9, '10': 'password'},
     const {'1': 'auth_token', '3': 4, '4': 1, '5': 9, '10': 'authToken'},
+    const {
+      '1': 'features',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.org.openksavi.sponge.grpcapi.ObjectValue',
+      '10': 'features'
+    },
   ],
 };
 

@@ -73,6 +73,10 @@ class SpongeGrpcUtils {
     if (restHeader.authToken != null) {
       grpcHeader.authToken = restHeader.authToken;
     }
+    if (restHeader.features != null) {
+      grpcHeader.features = grpc.ObjectValue.create()
+        ..valueJson = json.encode(restHeader.features);
+    }
 
     return grpcHeader;
   }
