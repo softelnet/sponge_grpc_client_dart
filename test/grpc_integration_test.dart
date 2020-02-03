@@ -30,7 +30,7 @@ void main() {
   final _logger = Logger('Test');
 
   Future<SpongeRestClient> getClient() async => SpongeRestClient(
-      SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
+      SpongeRestClientConfiguration('http://localhost:8888'));
   group('gRPC client', () {
     test('testVersion', () async {
       var restClient = await getClient();
