@@ -104,14 +104,6 @@ void main() {
     test('testRemoteApiFeatures', () async {
       var restClient = await getClient();
       var features = await restClient.getFeatures();
-      expect(features.length, equals(1));
-      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
-          isTrue);
-    });
-    test('testRemoteApiFeatures', () async {
-      var restClient = await getClient();
-      var features = await restClient.getFeatures();
-      expect(features.length, equals(1));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);
     });
