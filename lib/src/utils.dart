@@ -33,7 +33,7 @@ class SpongeGrpcUtils {
 
     if (grpcEvent.hasAttributes()) {
       Validate.isTrue(!grpcEvent.attributes.hasValueAny(),
-          'Any not supported for an event attributes');
+          'Any not supported for event attributes');
       if (grpcEvent.attributes.hasValueJson() &&
           (grpcEvent.attributes.valueJson?.isNotEmpty ?? false)) {
         Map<String, dynamic> jsonAttributes =
@@ -47,6 +47,16 @@ class SpongeGrpcUtils {
                 .unmarshal(eventType.getFieldType(entry.key), entry.value);
           }
         }
+      }
+    }
+
+    if (grpcEvent.hasFeatures()) {
+      Validate.isTrue(!grpcEvent.features.hasValueAny(),
+          'Any not supported for event features');
+      if (grpcEvent.features.hasValueJson() &&
+          (grpcEvent.features.valueJson?.isNotEmpty ?? false)) {
+        event.features = await FeaturesUtils.unmarshal(
+            restClient.typeConverter.featureConverter, json.decode(grpcEvent.features.valueJson));
       }
     }
 

@@ -55,6 +55,14 @@ const Event$json = const {
       '6': '.org.openksavi.sponge.grpcapi.ObjectValue',
       '10': 'attributes'
     },
+    const {
+      '1': 'features',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.org.openksavi.sponge.grpcapi.ObjectValue',
+      '10': 'features'
+    },
   ],
 };
 

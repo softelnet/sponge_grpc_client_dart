@@ -93,6 +93,7 @@ class Event extends $pb.GeneratedMessage {
     ..aOS(5, 'label')
     ..aOS(6, 'description')
     ..aOM<ObjectValue>(7, 'attributes', subBuilder: ObjectValue.create)
+    ..aOM<ObjectValue>(8, 'features', subBuilder: ObjectValue.create)
     ..hasRequiredFields = false;
 
   Event._() : super();
@@ -203,6 +204,20 @@ class Event extends $pb.GeneratedMessage {
   void clearAttributes() => clearField(7);
   @$pb.TagNumber(7)
   ObjectValue ensureAttributes() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  ObjectValue get features => $_getN(7);
+  @$pb.TagNumber(8)
+  set features(ObjectValue v) {
+    setField(8, v);
+  }
+
+  @$pb.TagNumber(8)
+  $core.bool hasFeatures() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearFeatures() => clearField(8);
+  @$pb.TagNumber(8)
+  ObjectValue ensureFeatures() => $_ensure(7);
 }
 
 class RequestHeader extends $pb.GeneratedMessage {

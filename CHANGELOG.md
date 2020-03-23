@@ -2,6 +2,8 @@
 
 * Support for a web client in the `package:sponge_grpc_client_dart/sponge_grpc_client_dart_web.dart`.
 * Added `features` to the request header.
+* Added support for event features.
+* Dependencies upgrade.
 
 ## 1.14.0 (2019-12-21)
 
