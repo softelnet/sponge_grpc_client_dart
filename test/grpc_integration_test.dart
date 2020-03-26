@@ -14,10 +14,13 @@
 
 import 'package:grpc/grpc.dart';
 import 'package:logging/logging.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client.dart';
+import 'package:sponge_grpc_client_dart/src/grpc_client_base.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
 import 'package:test/test.dart';
+import 'package:collection/collection.dart';
 import 'logger_configuration.dart';
 
 /// This integration test requires the sponge-examples-project-remote-api-client-test-service/RemoteApiClientTestServiceMain
@@ -29,8 +32,8 @@ void main() {
 
   final _logger = Logger('Test');
 
-  Future<SpongeRestClient> getClient() async => SpongeRestClient(
-      SpongeRestClientConfiguration('http://localhost:8888'));
+  Future<SpongeRestClient> getClient() async =>
+      SpongeRestClient(SpongeRestClientConfiguration('http://localhost:8888'));
   group('gRPC client', () {
     test('testVersion', () async {
       var restClient = await getClient();
@@ -127,6 +130,158 @@ void main() {
             isA<GrpcError>().having(
                 (ex) => ex.code, 'status', equals(StatusCode.unavailable)));
       }
+
+      await grpcClient.close();
+    });
+
+    Future<RemoteEvent> _waitForEvent(
+      SpongeGrpcClient grpcClient,
+      String eventName,
+      Future<void> Function() onSend,
+      bool Function(RemoteEvent) predicate,
+    ) async {
+      var subscription =
+          grpcClient.subscribe([eventName], registeredTypeRequired: true);
+
+      RemoteEvent receivedEvent;
+
+      subscription.eventStream.listen(
+        (event) async {
+          if (event.name == eventName && predicate(event)) {
+            receivedEvent = event;
+            unawaited(subscription.close());
+          }
+        },
+        onError: (e) {
+          _logger.severe('Error: $e');
+        },
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      await onSend();
+
+      // Block while waiting for the event.
+      await subscription.eventStream
+          .timeout(Duration(seconds: 30))
+          .listen((_) {})
+          .asFuture();
+
+      await subscription.close();
+
+      return receivedEvent;
+    }
+
+    test('testSendEventAction', () async {
+      var eventName = 'notification';
+      var eventLabel = 'NOTIFICATION LABEL';
+      var eventAttributes = {
+        'source': 'SOURCE',
+        'severity': 5,
+        'person': {'firstName': 'James', 'surname': 'Joyce'}
+      };
+
+      var restClient = await getClient()
+        ..configuration.username = 'john'
+        ..configuration.password = 'password';
+
+      // Insecure channel only for tests.
+      var grpcClient = DefaultSpongeGrpcClient(restClient,
+          channelOptions:
+              ChannelOptions(credentials: const ChannelCredentials.insecure()));
+
+      var receivedEvent = await _waitForEvent(
+        grpcClient,
+        eventName,
+        () async {
+          var sendEventActionName = 'GrpcApiSendEvent';
+          var providedArgs = await restClient
+              .provideActionArgs(sendEventActionName, provide: ['name']);
+
+          expect(providedArgs.length, 1);
+          expect(providedArgs['name'].annotatedValueSet.length, 1);
+
+          providedArgs = await restClient.provideActionArgs(
+            sendEventActionName,
+            provide: ['attributes'],
+            current: {'name': eventName},
+          );
+          var providedAttributes =
+              (providedArgs['attributes'].value as DynamicValue).value;
+          expect(providedAttributes.length, 0);
+
+          var eventType = await restClient.getEventType(eventName);
+          expect(eventType, isNotNull);
+
+          // Send a new event by the action.
+          await restClient.call(sendEventActionName, [
+            eventName,
+            DynamicValue(eventAttributes, eventType),
+            eventLabel,
+            null
+          ]);
+        },
+        (event) =>
+            DeepCollectionEquality()
+                .equals(event.attributes, eventAttributes) &&
+            event.label == eventLabel,
+      );
+
+      expect(receivedEvent, isNotNull);
+
+      await grpcClient.close();
+    });
+
+    test('testSendEvent', () async {
+      var eventName = 'notification';
+      var eventLabel = 'NOTIFICATION LABEL';
+      var eventDescription = 'NOTIFICATION DESCRIPTION';
+      var eventAttributes = {
+        'source': 'SOURCE',
+        'severity': 5,
+        'person': {'firstName': 'James', 'surname': 'Joyce'}
+      };
+      var eventFeatures = {
+        'icon': IconInfo(name: 'alarm', color: 'FFFFFF'),
+        'extra': 'Extra feature'
+      };
+
+      var restClient = await getClient()
+        ..configuration.username = 'john'
+        ..configuration.password = 'password';
+
+      // Insecure channel only for tests.
+      var grpcClient = DefaultSpongeGrpcClient(restClient,
+          channelOptions:
+              ChannelOptions(credentials: const ChannelCredentials.insecure()));
+
+      var predicate = (event) =>
+          event.features['icon'] != null &&
+          (event.features['icon'] as IconInfo).name ==
+              (eventFeatures['icon'] as IconInfo).name &&
+          (event.features['icon'] as IconInfo).color ==
+              (eventFeatures['icon'] as IconInfo).color &&
+          event.features['extra'] == eventFeatures['extra'];
+
+      var receivedEvent = await _waitForEvent(
+        grpcClient,
+        eventName,
+        () async => await restClient.send(
+          eventName,
+          attributes: eventAttributes,
+          label: eventLabel,
+          description: eventDescription,
+          features: eventFeatures,
+        ),
+        (event) =>
+            DeepCollectionEquality()
+                .equals(event.attributes, eventAttributes) &&
+            predicate(event) &&
+            event.label == eventLabel &&
+            event.description == eventDescription,
+      );
+
+      expect(receivedEvent, isNotNull);
 
       await grpcClient.close();
     });
