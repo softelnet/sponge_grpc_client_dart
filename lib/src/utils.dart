@@ -56,7 +56,8 @@ class SpongeGrpcUtils {
       if (grpcEvent.features.hasValueJson() &&
           (grpcEvent.features.valueJson?.isNotEmpty ?? false)) {
         event.features = await FeaturesUtils.unmarshal(
-            restClient.typeConverter.featureConverter, json.decode(grpcEvent.features.valueJson));
+            restClient.typeConverter.featureConverter,
+            json.decode(grpcEvent.features.valueJson));
       }
     }
 
