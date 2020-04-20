@@ -97,6 +97,14 @@ const ResponseHeader$json = const {
       '5': 9,
       '10': 'detailedErrorMessage'
     },
+    const {
+      '1': 'features',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.org.openksavi.sponge.grpcapi.ObjectValue',
+      '10': 'features'
+    },
   ],
 };
 

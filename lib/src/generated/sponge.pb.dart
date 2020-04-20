@@ -324,6 +324,7 @@ class ResponseHeader extends $pb.GeneratedMessage {
     ..aOS(2, 'errorCode')
     ..aOS(3, 'errorMessage')
     ..aOS(4, 'detailedErrorMessage')
+    ..aOM<ObjectValue>(5, 'features', subBuilder: ObjectValue.create)
     ..hasRequiredFields = false;
 
   ResponseHeader._() : super();
@@ -395,6 +396,20 @@ class ResponseHeader extends $pb.GeneratedMessage {
   $core.bool hasDetailedErrorMessage() => $_has(3);
   @$pb.TagNumber(4)
   void clearDetailedErrorMessage() => clearField(4);
+
+  @$pb.TagNumber(5)
+  ObjectValue get features => $_getN(4);
+  @$pb.TagNumber(5)
+  set features(ObjectValue v) {
+    setField(5, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasFeatures() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearFeatures() => clearField(5);
+  @$pb.TagNumber(5)
+  ObjectValue ensureFeatures() => $_ensure(4);
 }
 
 class VersionRequest extends $pb.GeneratedMessage {
