@@ -21,7 +21,7 @@ import 'package:sponge_client_dart/sponge_client_dart.dart';
 
 class SpongeGrpcUtils {
   static Future<RemoteEvent> createEventFromGrpc(
-      SpongeRestClient restClient, Event grpcEvent) async {
+      SpongeClient restClient, Event grpcEvent) async {
     var event = RemoteEvent(
       id: grpcEvent.hasId() ? grpcEvent.id : null,
       name: grpcEvent.hasName() ? grpcEvent.name : null,
@@ -64,9 +64,9 @@ class SpongeGrpcUtils {
     return event;
   }
 
-  /// Uses the REST client in order to setup the gRPC request header
-  /// by reusing the REST API authentication data.
-  static grpc.RequestHeader createRequestHeader(SpongeRestClient restClient) {
+  /// Uses the Remote client in order to setup the gRPC request header
+  /// by reusing the Remote API authentication data.
+  static grpc.RequestHeader createRequestHeader(SpongeClient restClient) {
     // Create a fake request to obtain a header.
     var restHeader = restClient.setupRequest(GetVersionRequest()).header;
 
@@ -92,7 +92,7 @@ class SpongeGrpcUtils {
     return grpcHeader;
   }
 
-  static void handleResponseHeader(SpongeRestClient restClient,
+  static void handleResponseHeader(SpongeClient restClient,
       String operation, grpc.ResponseHeader header) {
     if (header == null) {
       return;

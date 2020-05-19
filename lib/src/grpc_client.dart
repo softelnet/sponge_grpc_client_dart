@@ -23,12 +23,12 @@ import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
 /// A Sponge gRPC API client.
 class DefaultSpongeGrpcClient extends SpongeGrpcClient {
   DefaultSpongeGrpcClient(
-    SpongeRestClient restClient, {
+    SpongeClient spongeClient, {
     SpongeGrpcClientConfiguration configuration,
     ChannelOptions channelOptions = const ChannelOptions(),
     bool autoOpen = true,
   })  : _channelOptions = channelOptions,
-        super(restClient, configuration: configuration) {
+        super(spongeClient, configuration: configuration) {
     if (autoOpen) open();
   }
 
@@ -46,15 +46,15 @@ class DefaultSpongeGrpcClient extends SpongeGrpcClient {
       return;
     }
 
-    var restUri = Uri.parse(restClient.configuration.url);
+    var restUri = Uri.parse(spongeClient.configuration.url);
 
     var host = restUri.host;
     var port = configuration?.port;
 
-    // If the port is not configured explicitly, use the Sponge gRPC API service port convention: REST API port + 1.
+    // If the port is not configured explicitly, use the Sponge gRPC API service port convention: Remote API port + 1.
     port ??= (restUri.hasPort
             ? restUri.port
-            : (restClient.configuration.secure ? 443 : 80)) +
+            : (spongeClient.configuration.secure ? 443 : 80)) +
         1;
     var isSecure = _channelOptions?.credentials?.isSecure ?? false;
     _logger.finer(

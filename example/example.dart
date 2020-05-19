@@ -17,13 +17,13 @@ import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/sponge_grpc_client_dart.dart';
 
 void main() async {
-  // Create a new Sponge REST API client.
-  var restClient = SpongeRestClient(
-      SpongeRestClientConfiguration('http://localhost:8888'));
+  // Create a new Sponge Remote API client.
+  var spongeClient =
+      SpongeClient(SpongeClientConfiguration('http://localhost:8888'));
 
-  // Create a new Sponge gRPC API client associated with the REST API client.
+  // Create a new Sponge gRPC API client associated with the Remote API client.
   // Don't use insecure channel in production.
-  var grpcClient = DefaultSpongeGrpcClient(restClient,
+  var grpcClient = DefaultSpongeGrpcClient(spongeClient,
       channelOptions:
           ChannelOptions(credentials: const ChannelCredentials.insecure()));
 

@@ -25,13 +25,13 @@ import 'package:sync/semaphore.dart';
 /// A base Sponge gRPC API client.
 abstract class SpongeGrpcClient {
   SpongeGrpcClient(
-    SpongeRestClient restClient, {
+    SpongeClient spongeClient, {
     SpongeGrpcClientConfiguration configuration,
-  })  : _restClient = restClient,
+  })  : _spongeClient = spongeClient,
         _configuration = configuration;
 
-  final SpongeRestClient _restClient;
-  SpongeRestClient get restClient => _restClient;
+  final SpongeClient _spongeClient;
+  SpongeClient get spongeClient => _spongeClient;
 
   final SpongeGrpcClientConfiguration _configuration;
   SpongeGrpcClientConfiguration get configuration => _configuration;
@@ -52,15 +52,15 @@ abstract class SpongeGrpcClient {
 
   Future<String> getVersion({CallOptions options}) async {
     var request = VersionRequest()
-      ..header = SpongeGrpcUtils.createRequestHeader(_restClient);
+      ..header = SpongeGrpcUtils.createRequestHeader(_spongeClient);
 
-    var response = await restClient.executeWithAuthentication(
+    var response = await spongeClient.executeWithAuthentication(
         requestUsername: request.header.username,
         requestPassword: request.header.password,
         requestAuthToken: request.header.authToken,
         onExecute: () async {
           var response = await _service.getVersion(request, options: options);
-          SpongeGrpcUtils.handleResponseHeader(_restClient, 'getVersion',
+          SpongeGrpcUtils.handleResponseHeader(_spongeClient, 'getVersion',
               response.hasHeader() ? response.header : null);
 
           return response;
@@ -137,7 +137,7 @@ class ClientSubscription {
         _id = response.subscriptionId?.toInt();
       }
       return SpongeGrpcUtils.createEventFromGrpc(
-          _grpcClient.restClient, response.event);
+          _grpcClient.spongeClient, response.event);
     }));
     _subscribed = true;
   }
@@ -162,14 +162,14 @@ class ClientSubscription {
   }
 
   Future<SubscribeRequest> _createAndSetupSubscribeRequest() async {
-    if (_grpcClient.restClient.configuration.autoUseAuthToken) {
+    if (_grpcClient.spongeClient.configuration.autoUseAuthToken) {
       // Invoke the synchronous gRPC API operation to ensure the current authToken renewal. The auth token is shared
-      // by both the REST and gRPC connection. Here the `getVersion` operation is used.
+      // by both the Remote API and gRPC connection. Here the `getVersion` operation is used.
       await _grpcClient.getVersion();
     }
 
     return SubscribeRequest()
-      ..header = SpongeGrpcUtils.createRequestHeader(_grpcClient.restClient)
+      ..header = SpongeGrpcUtils.createRequestHeader(_grpcClient.spongeClient)
       ..eventNames.addAll(eventNames)
       ..registeredTypeRequired = registeredTypeRequired;
   }
