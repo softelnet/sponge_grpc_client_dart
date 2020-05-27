@@ -224,11 +224,10 @@ class RequestHeader extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('RequestHeader',
       package: const $pb.PackageName('org.openksavi.sponge.grpcapi'),
       createEmptyInstance: create)
-    ..aOS(1, 'id')
-    ..aOS(2, 'username')
-    ..aOS(3, 'password')
-    ..aOS(4, 'authToken')
-    ..aOM<ObjectValue>(5, 'features', subBuilder: ObjectValue.create)
+    ..aOS(1, 'username')
+    ..aOS(2, 'password')
+    ..aOS(3, 'authToken')
+    ..aOM<ObjectValue>(4, 'features', subBuilder: ObjectValue.create)
     ..hasRequiredFields = false;
 
   RequestHeader._() : super();
@@ -254,77 +253,61 @@ class RequestHeader extends $pb.GeneratedMessage {
   static RequestHeader _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
+  $core.String get username => $_getSZ(0);
   @$pb.TagNumber(1)
-  set id($core.String v) {
+  set username($core.String v) {
     $_setString(0, v);
   }
 
   @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
+  $core.bool hasUsername() => $_has(0);
   @$pb.TagNumber(1)
-  void clearId() => clearField(1);
+  void clearUsername() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get username => $_getSZ(1);
+  $core.String get password => $_getSZ(1);
   @$pb.TagNumber(2)
-  set username($core.String v) {
+  set password($core.String v) {
     $_setString(1, v);
   }
 
   @$pb.TagNumber(2)
-  $core.bool hasUsername() => $_has(1);
+  $core.bool hasPassword() => $_has(1);
   @$pb.TagNumber(2)
-  void clearUsername() => clearField(2);
+  void clearPassword() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get password => $_getSZ(2);
+  $core.String get authToken => $_getSZ(2);
   @$pb.TagNumber(3)
-  set password($core.String v) {
+  set authToken($core.String v) {
     $_setString(2, v);
   }
 
   @$pb.TagNumber(3)
-  $core.bool hasPassword() => $_has(2);
+  $core.bool hasAuthToken() => $_has(2);
   @$pb.TagNumber(3)
-  void clearPassword() => clearField(3);
+  void clearAuthToken() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get authToken => $_getSZ(3);
+  ObjectValue get features => $_getN(3);
   @$pb.TagNumber(4)
-  set authToken($core.String v) {
-    $_setString(3, v);
-  }
-
-  @$pb.TagNumber(4)
-  $core.bool hasAuthToken() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearAuthToken() => clearField(4);
-
-  @$pb.TagNumber(5)
-  ObjectValue get features => $_getN(4);
-  @$pb.TagNumber(5)
   set features(ObjectValue v) {
-    setField(5, v);
+    setField(4, v);
   }
 
-  @$pb.TagNumber(5)
-  $core.bool hasFeatures() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearFeatures() => clearField(5);
-  @$pb.TagNumber(5)
-  ObjectValue ensureFeatures() => $_ensure(4);
+  @$pb.TagNumber(4)
+  $core.bool hasFeatures() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearFeatures() => clearField(4);
+  @$pb.TagNumber(4)
+  ObjectValue ensureFeatures() => $_ensure(3);
 }
 
 class ResponseHeader extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('ResponseHeader',
       package: const $pb.PackageName('org.openksavi.sponge.grpcapi'),
       createEmptyInstance: create)
-    ..aOS(1, 'id')
-    ..aOS(2, 'errorCode')
-    ..aOS(3, 'errorMessage')
-    ..aOS(4, 'detailedErrorMessage')
-    ..aOM<ObjectValue>(5, 'features', subBuilder: ObjectValue.create)
+    ..aOM<ObjectValue>(1, 'features', subBuilder: ObjectValue.create)
     ..hasRequiredFields = false;
 
   ResponseHeader._() : super();
@@ -350,66 +333,18 @@ class ResponseHeader extends $pb.GeneratedMessage {
   static ResponseHeader _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
+  ObjectValue get features => $_getN(0);
   @$pb.TagNumber(1)
-  set id($core.String v) {
-    $_setString(0, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearId() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get errorCode => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set errorCode($core.String v) {
-    $_setString(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasErrorCode() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearErrorCode() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get errorMessage => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set errorMessage($core.String v) {
-    $_setString(2, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasErrorMessage() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearErrorMessage() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get detailedErrorMessage => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set detailedErrorMessage($core.String v) {
-    $_setString(3, v);
-  }
-
-  @$pb.TagNumber(4)
-  $core.bool hasDetailedErrorMessage() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearDetailedErrorMessage() => clearField(4);
-
-  @$pb.TagNumber(5)
-  ObjectValue get features => $_getN(4);
-  @$pb.TagNumber(5)
   set features(ObjectValue v) {
-    setField(5, v);
+    setField(1, v);
   }
 
-  @$pb.TagNumber(5)
-  $core.bool hasFeatures() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearFeatures() => clearField(5);
-  @$pb.TagNumber(5)
-  ObjectValue ensureFeatures() => $_ensure(4);
+  @$pb.TagNumber(1)
+  $core.bool hasFeatures() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFeatures() => clearField(1);
+  @$pb.TagNumber(1)
+  ObjectValue ensureFeatures() => $_ensure(0);
 }
 
 class VersionRequest extends $pb.GeneratedMessage {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'package:meta/meta.dart';
 
 import 'package:grpc/service_api.dart';
 import 'package:logging/logging.dart';
@@ -59,11 +60,12 @@ abstract class SpongeGrpcClient {
         requestPassword: request.header.password,
         requestAuthToken: request.header.authToken,
         onExecute: () async {
-          var response = await _service.getVersion(request, options: options);
-          SpongeGrpcUtils.handleResponseHeader(_spongeClient, 'getVersion',
-              response.hasHeader() ? response.header : null);
-
-          return response;
+          try {
+            return await _service.getVersion(request, options: options);
+          } on Exception catch (e) {
+            handleError('getVersion', e);
+            rethrow;
+          }
         },
         onClearAuthToken: () => request.header.authToken = null);
 
@@ -84,6 +86,9 @@ abstract class SpongeGrpcClient {
 
   /// This method is necessary in order to provide a web gRPC support.
   bool isCancelledErrorCode(dynamic error);
+
+  @protected
+  void handleError(String operation, Exception exception);
 }
 
 class ClientSubscription {

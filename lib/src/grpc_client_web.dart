@@ -13,12 +13,14 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'package:meta/meta.dart';
 import 'package:grpc/grpc_web.dart';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_base.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
+import 'package:sponge_grpc_client_dart/src/utils.dart';
 
 /// A Sponge web gRPC API client.
 class WebSpongeGrpcClient extends SpongeGrpcClient {
@@ -41,23 +43,23 @@ class WebSpongeGrpcClient extends SpongeGrpcClient {
       return;
     }
 
-    var restUri = Uri.parse(spongeClient.configuration.url);
+    var remoteApiUri = Uri.parse(spongeClient.configuration.url);
 
-    var host = restUri.host;
+    var host = remoteApiUri.host;
     var port = configuration?.port;
 
     // If the port is not configured explicitly, use the Sponge gRPC Web API service port convention: Remote API port + 2.
-    port ??= (restUri.hasPort
-            ? restUri.port
+    port ??= (remoteApiUri.hasPort
+            ? remoteApiUri.port
             : (spongeClient.configuration.secure ? 443 : 80)) +
         2;
 
-    var isSecure = restUri.isScheme('HTTPS');
+    var isSecure = remoteApiUri.isScheme('HTTPS');
     _logger.finer(
         'Creating a new web client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
 
     _channel =
-        GrpcWebClientChannel.xhr(Uri.parse('${restUri.scheme}://$host:$port'));
+        GrpcWebClientChannel.xhr(Uri.parse('${remoteApiUri.scheme}://$host:$port'));
     service = SpongeGrpcApiClient(_channel);
   }
 
@@ -91,4 +93,21 @@ class WebSpongeGrpcClient extends SpongeGrpcClient {
   @override
   bool isCancelledErrorCode(error) =>
       error is GrpcError && error.code == StatusCode.cancelled;
+
+  @protected
+  @override
+  void handleError(String operation, Exception exception) {
+    GrpcError grpcError = exception is GrpcError ? exception : null;
+
+    if (grpcError != null &&
+        SpongeGrpcUtils.isPredefinedGrpcStatusCode(grpcError.code)) {
+      throw exception;
+    }
+
+    spongeClient.handleErrorResponse(
+        operation,
+        ResponseError(
+            grpcError?.code ?? SpongeClientConstants.ERROR_CODE_GENERIC,
+            grpcError?.message ?? exception?.toString()));
+  }
 }

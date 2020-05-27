@@ -36,24 +36,24 @@ void main() {
       SpongeClient(SpongeClientConfiguration('http://localhost:8888'));
   group('gRPC client', () {
     test('testVersion', () async {
-      var restClient = await getClient();
+      var spongeClient = await getClient();
       // Insecure channel only for tests.
-      var grpcClient = DefaultSpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(spongeClient,
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
       var version = await grpcClient.getVersion();
 
-      expect(version, equals(await restClient.getVersion()));
+      expect(version, equals(await spongeClient.getVersion()));
       _logger.info('Version: $version');
 
       await grpcClient.close();
     });
 
     Future<void> _testSubscribe(bool managed) async {
-      var restClient = await getClient();
+      var spongeClient = await getClient();
       // Insecure channel only for tests.
-      var grpcClient = DefaultSpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(spongeClient,
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
@@ -105,15 +105,15 @@ void main() {
     test('testSubscribeManaged', () async => await _testSubscribe(true));
     test('testSubscribeNotManaged', () async => await _testSubscribe(false));
     test('testRemoteApiFeatures', () async {
-      var restClient = await getClient();
-      var features = await restClient.getFeatures();
+      var spongeClient = await getClient();
+      var features = await spongeClient.getFeatures();
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);
     });
     test('testPortChange', () async {
-      var restClient = await getClient();
+      var spongeClient = await getClient();
       // Insecure channel only for tests.
-      var grpcClient = DefaultSpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(spongeClient,
           configuration: SpongeGrpcClientConfiguration(
             port: 9000,
           ),
@@ -181,12 +181,12 @@ void main() {
         'person': {'firstName': 'James', 'surname': 'Joyce'}
       };
 
-      var restClient = await getClient()
+      var spongeClient = await getClient()
         ..configuration.username = 'john'
         ..configuration.password = 'password';
 
       // Insecure channel only for tests.
-      var grpcClient = DefaultSpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(spongeClient,
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
@@ -195,13 +195,13 @@ void main() {
         eventName,
         () async {
           var sendEventActionName = 'GrpcApiSendEvent';
-          var providedArgs = await restClient
+          var providedArgs = await spongeClient
               .provideActionArgs(sendEventActionName, provide: ['name']);
 
           expect(providedArgs.length, 1);
           expect(providedArgs['name'].annotatedValueSet.length, 1);
 
-          providedArgs = await restClient.provideActionArgs(
+          providedArgs = await spongeClient.provideActionArgs(
             sendEventActionName,
             provide: ['attributes'],
             current: {'name': eventName},
@@ -210,11 +210,11 @@ void main() {
               (providedArgs['attributes'].value as DynamicValue).value;
           expect(providedAttributes.length, 0);
 
-          var eventType = await restClient.getEventType(eventName);
+          var eventType = await spongeClient.getEventType(eventName);
           expect(eventType, isNotNull);
 
           // Send a new event by the action.
-          await restClient.call(sendEventActionName, [
+          await spongeClient.call(sendEventActionName, args: [
             eventName,
             DynamicValue(eventAttributes, eventType),
             eventLabel,
@@ -246,12 +246,12 @@ void main() {
         'extra': 'Extra feature'
       };
 
-      var restClient = await getClient()
+      var spongeClient = await getClient()
         ..configuration.username = 'john'
         ..configuration.password = 'password';
 
       // Insecure channel only for tests.
-      var grpcClient = DefaultSpongeGrpcClient(restClient,
+      var grpcClient = DefaultSpongeGrpcClient(spongeClient,
           channelOptions:
               ChannelOptions(credentials: const ChannelCredentials.insecure()));
 
@@ -266,7 +266,7 @@ void main() {
       var receivedEvent = await _waitForEvent(
         grpcClient,
         eventName,
-        () async => await restClient.send(
+        () async => await spongeClient.send(
           eventName,
           attributes: eventAttributes,
           label: eventLabel,

@@ -21,7 +21,7 @@ import 'package:sponge_client_dart/sponge_client_dart.dart';
 
 class SpongeGrpcUtils {
   static Future<RemoteEvent> createEventFromGrpc(
-      SpongeClient restClient, Event grpcEvent) async {
+      SpongeClient spongeClient, Event grpcEvent) async {
     var event = RemoteEvent(
       id: grpcEvent.hasId() ? grpcEvent.id : null,
       name: grpcEvent.hasName() ? grpcEvent.name : null,
@@ -38,12 +38,12 @@ class SpongeGrpcUtils {
           (grpcEvent.attributes.valueJson?.isNotEmpty ?? false)) {
         Map<String, dynamic> jsonAttributes =
             json.decode(grpcEvent.attributes.valueJson);
-        var eventType = await restClient.getEventType(event.name);
+        var eventType = await spongeClient.getEventType(event.name);
 
         // Unmarshal event attributes only if the event type is registered.
         if (eventType != null) {
           for (var entry in jsonAttributes.entries) {
-            event.attributes[entry.key] = await restClient.typeConverter
+            event.attributes[entry.key] = await spongeClient.typeConverter
                 .unmarshal(eventType.getFieldType(entry.key), entry.value);
           }
         }
@@ -56,7 +56,7 @@ class SpongeGrpcUtils {
       if (grpcEvent.features.hasValueJson() &&
           (grpcEvent.features.valueJson?.isNotEmpty ?? false)) {
         event.features = await FeaturesUtils.unmarshal(
-            restClient.typeConverter.featureConverter,
+            spongeClient.typeConverter.featureConverter,
             json.decode(grpcEvent.features.valueJson));
       }
     }
@@ -66,42 +66,30 @@ class SpongeGrpcUtils {
 
   /// Uses the Remote client in order to setup the gRPC request header
   /// by reusing the Remote API authentication data.
-  static grpc.RequestHeader createRequestHeader(SpongeClient restClient) {
+  static grpc.RequestHeader createRequestHeader(SpongeClient spongeClient) {
     // Create a fake request to obtain a header.
-    var restHeader = restClient.setupRequest(GetVersionRequest()).header;
+    var jsonHeader = spongeClient.setupRequest(GetVersionRequest()).header;
 
     var grpcHeader = grpc.RequestHeader.create();
 
-    if (restHeader.id != null) {
-      grpcHeader.id = restHeader.id;
+    if (jsonHeader.username != null) {
+      grpcHeader.username = jsonHeader.username;
     }
-    if (restHeader.username != null) {
-      grpcHeader.username = restHeader.username;
+    if (jsonHeader.password != null) {
+      grpcHeader.password = jsonHeader.password;
     }
-    if (restHeader.password != null) {
-      grpcHeader.password = restHeader.password;
+    if (jsonHeader.authToken != null) {
+      grpcHeader.authToken = jsonHeader.authToken;
     }
-    if (restHeader.authToken != null) {
-      grpcHeader.authToken = restHeader.authToken;
-    }
-    if (restHeader.features != null) {
+    if (jsonHeader.features != null) {
       grpcHeader.features = grpc.ObjectValue.create()
-        ..valueJson = json.encode(restHeader.features);
+        ..valueJson = json.encode(jsonHeader.features);
     }
 
     return grpcHeader;
   }
 
-  static void handleResponseHeader(SpongeClient restClient,
-      String operation, grpc.ResponseHeader header) {
-    if (header == null) {
-      return;
-    }
-
-    restClient.handleResponseHeader(
-        operation,
-        header.hasErrorCode() ? header.errorCode : null,
-        header.hasErrorMessage() ? header.errorMessage : null,
-        header.hasDetailedErrorMessage() ? header.detailedErrorMessage : null);
+  static bool isPredefinedGrpcStatusCode(int code) {
+    return code >= 0 && code < SpongeClientConstants.ERROR_CODE_GENERIC;
   }
 }

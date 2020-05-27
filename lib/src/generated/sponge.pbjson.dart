@@ -69,13 +69,12 @@ const Event$json = const {
 const RequestHeader$json = const {
   '1': 'RequestHeader',
   '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'username', '3': 2, '4': 1, '5': 9, '10': 'username'},
-    const {'1': 'password', '3': 3, '4': 1, '5': 9, '10': 'password'},
-    const {'1': 'auth_token', '3': 4, '4': 1, '5': 9, '10': 'authToken'},
+    const {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+    const {'1': 'password', '3': 2, '4': 1, '5': 9, '10': 'password'},
+    const {'1': 'auth_token', '3': 3, '4': 1, '5': 9, '10': 'authToken'},
     const {
       '1': 'features',
-      '3': 5,
+      '3': 4,
       '4': 1,
       '5': 11,
       '6': '.org.openksavi.sponge.grpcapi.ObjectValue',
@@ -87,19 +86,9 @@ const RequestHeader$json = const {
 const ResponseHeader$json = const {
   '1': 'ResponseHeader',
   '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'error_code', '3': 2, '4': 1, '5': 9, '10': 'errorCode'},
-    const {'1': 'error_message', '3': 3, '4': 1, '5': 9, '10': 'errorMessage'},
-    const {
-      '1': 'detailed_error_message',
-      '3': 4,
-      '4': 1,
-      '5': 9,
-      '10': 'detailedErrorMessage'
-    },
     const {
       '1': 'features',
-      '3': 5,
+      '3': 1,
       '4': 1,
       '5': 11,
       '6': '.org.openksavi.sponge.grpcapi.ObjectValue',
