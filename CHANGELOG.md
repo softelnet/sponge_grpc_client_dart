@@ -1,6 +1,6 @@
-## 1.16.0 (not relesed yet)
+## 1.16.0 (2020-06-12)
 
-* Updated the proto file according to the changes in Sponge.
+* API change: Updated the proto file according to the changes in Sponge 1.16.0.
 * Added `features` to the response header.
 
 ## 1.15.0 (2020-03-30)

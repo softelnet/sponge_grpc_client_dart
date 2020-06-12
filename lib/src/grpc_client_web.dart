@@ -58,8 +58,8 @@ class WebSpongeGrpcClient extends SpongeGrpcClient {
     _logger.finer(
         'Creating a new web client to the ${isSecure ? "secure" : "insecure"} Sponge gRPC API service on $host:$port');
 
-    _channel =
-        GrpcWebClientChannel.xhr(Uri.parse('${remoteApiUri.scheme}://$host:$port'));
+    _channel = GrpcWebClientChannel.xhr(
+        Uri.parse('${remoteApiUri.scheme}://$host:$port'));
     service = SpongeGrpcApiClient(_channel);
   }
 

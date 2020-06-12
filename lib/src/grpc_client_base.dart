@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import 'dart:async';
-import 'package:meta/meta.dart';
 
 import 'package:grpc/service_api.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_grpc_client_dart/src/generated/sponge.pbgrpc.dart';
 import 'package:sponge_grpc_client_dart/src/grpc_client_configuration.dart';
