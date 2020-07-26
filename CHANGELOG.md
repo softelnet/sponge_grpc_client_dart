@@ -1,3 +1,6 @@
+## 1.16.1 (not released yet)
+* Dependencies upgrade.
+
 ## 1.16.0 (2020-06-12)
 
 * API change: Updated the proto file according to the changes in Sponge 1.16.0.

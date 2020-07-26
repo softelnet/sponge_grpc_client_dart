@@ -1,7 +1,7 @@
 name: sponge_grpc_client_dart
 description: Sponge gRPC client for Dart. It simplifies connecting to a remote Sponge gRPC service.
 homepage: https://github.com/softelnet/sponge_grpc_client_dart
-version: 1.16.0
+version: 1.16.1
 
 environment:
   sdk: '>=2.3.0 <3.0.0'
@@ -13,7 +13,7 @@ dependencies:
   fixnum: ^0.10.11
   meta: ^1.1.8
   logging: ^0.11.4
-  sponge_client_dart: #^1.16.0 # Uncomment for publishing.
+  sponge_client_dart: #^1.16.1 # Uncomment for publishing.
     path: ../sponge_client_dart # Use the local library if possible. Comment for publishing.
 
 dev_dependencies:
