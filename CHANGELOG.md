@@ -1,4 +1,4 @@
-## 1.16.1 (not released yet)
+## 1.16.1 (2020-07-29)
 * Dependencies upgrade.
 
 ## 1.16.0 (2020-06-12)
