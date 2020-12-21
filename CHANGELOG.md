@@ -1,7 +1,13 @@
+## 1.16.3 (2020-12-21)
+
+* Version changed in accordance with `sponge_client_dart`.
+
 ## 1.16.2 (2020-08-27)
+
 * Version changed in accordance with `sponge_client_dart`.
   
 ## 1.16.1 (2020-07-29)
+
 * Dependencies upgrade.
 
 ## 1.16.0 (2020-06-12)
