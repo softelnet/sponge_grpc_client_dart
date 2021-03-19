@@ -1,3 +1,6 @@
+## 1.17.0 (2021-03-19)
+
+* Version changed in accordance with `sponge_client_dart`.
 ## 1.16.3 (2020-12-21)
 
 * Version changed in accordance with `sponge_client_dart`.
