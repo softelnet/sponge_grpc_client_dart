@@ -1,3 +1,6 @@
+## 1.18.0 (not released yet)
+* Dependencies upgrade.
+
 ## 1.17.0 (2021-03-19)
 
 * Version changed in accordance with `sponge_client_dart`.

@@ -37,9 +37,7 @@ abstract class SpongeGrpcClient {
   final SpongeGrpcClientConfiguration _configuration;
   SpongeGrpcClientConfiguration get configuration => _configuration;
 
-  SpongeGrpcApiClient _service;
-  SpongeGrpcApiClient get service => _service;
-  set service(SpongeGrpcApiClient value) => _service = value;
+  SpongeGrpcApiClient service;
 
   /// Keep alive request interval for subscriptions (in seconds). Defaults to 15 minutes.
   int keepAliveInterval = 15 * 60;
@@ -61,7 +59,7 @@ abstract class SpongeGrpcClient {
         requestAuthToken: request.header.authToken,
         onExecute: () async {
           try {
-            return await _service.getVersion(request, options: options);
+            return await service.getVersion(request, options: options);
           } on Exception catch (e) {
             handleError('getVersion', e);
             rethrow;
