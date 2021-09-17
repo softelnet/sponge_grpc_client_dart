@@ -18,8 +18,8 @@ dependencies:
 
 dependency_overrides:
   # Use the local library if possible.
-  #sponge_client_dart:
-  #  path: ../sponge_client_dart
+  sponge_client_dart:
+    path: ../sponge_client_dart
 
 dev_dependencies:
   test: ^1.17.12
